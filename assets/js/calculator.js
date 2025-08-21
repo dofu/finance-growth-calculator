@@ -347,8 +347,30 @@ function updateProgressMilestones(dataPoints, age) {
   });
 }
 
+// Toggle Instructions Function
+function toggleInstructions() {
+  const steps = document.getElementById('instructionSteps');
+  const toggleIcon = document.querySelector('.toggle-icon');
+  
+  steps.classList.toggle('collapsed');
+  toggleIcon.classList.toggle('rotated');
+  
+  // Update toggle icon
+  if (steps.classList.contains('collapsed')) {
+    toggleIcon.textContent = '+';
+  } else {
+    toggleIcon.textContent = '−';
+  }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
+  // Set instructions closed by default
+  const steps = document.getElementById('instructionSteps');
+  const toggleIcon = document.querySelector('.toggle-icon');
+  steps.classList.add('collapsed');
+  toggleIcon.textContent = '+';
+  
   updateInputs();
   updateDisplays();
   

@@ -18,6 +18,48 @@
     </div>
   </section>
 
+  <!-- Instructions Section -->
+  <section class="instructions-banner">
+    <div class="instructions-content">
+      <div class="instructions-header" onclick="toggleInstructions()">
+        <h3>How It Works</h3>
+        <button class="toggle-btn" id="toggleBtn">
+          <span class="toggle-icon">−</span>
+        </button>
+      </div>
+      <div class="instruction-steps" id="instructionSteps">
+        <div class="step-item">
+          <div class="step-icon">💰</div>
+          <div class="step-content">
+            <h4>Set Monthly Amount</h4>
+            <p>Enter how much you plan to invest each month</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">📈</div>
+          <div class="step-content">
+            <h4>Choose Expected Returns</h4>
+            <p>Select your anticipated annual return rate (1-15%)</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">⏰</div>
+          <div class="step-content">
+            <h4>Pick Timeline</h4>
+            <p>Set your investment period and optionally add your age</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">🎯</div>
+          <div class="step-content">
+            <h4>See Your Wealth Grow</h4>
+            <p>Watch compound interest build your financial future</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Main Calculator -->
   <section class="calculator-section">
     <div class="calculator-card">
@@ -172,7 +214,7 @@
   </section>
 
   <!-- Simple Instructions -->
-  <div class="simple-instructions">
+  <div class="simple-instructions" style="display: none;">
     <p>Set your monthly investment amount and expected annual return rate. Choose your investment timeline and optionally add your current age for milestone tracking. Click 'Calculate My Wealth' to see how compound interest grows your money over time.</p>
   </div>
 
