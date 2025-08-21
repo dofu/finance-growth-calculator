@@ -1,4 +1,4 @@
-# 💰 WealthGrow - Smart Investment Calculator
+# 💰 Finance Growth Calculator
 
 URL: https://dofu.github.io/finance-growth-calculator/
 
