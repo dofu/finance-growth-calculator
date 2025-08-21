@@ -17,14 +17,21 @@ A compound interest calculator that helps users visualise how their investments 
 
 ```
 wealthgrow-calculator/
-├── index.html              # Main HTML file with embedded CSS/JS
-├── img/
-│   └── blank-state-ramen.svg   # Animated placeholder graphic
-├── README.md               # Project documentation
-└── screenshots/            # Demo images for README
-    ├── desktop-view.png
-    ├── mobile-view.png
-    └── equation-layout.png
+│
+├── index.html                 # Main HTML file
+├── README.md                  # Project documentation
+├── LICENSE                    # MIT License file
+│
+├── assets/
+│   ├── css/
+│   │   └── styles.css         # All CSS styles
+│   │
+│   ├── js/
+│   │   └── calculator.js      # JavaScript functionality
+│   │
+│   └── img/
+│       └── blank-state-ramen.svg  # Animated ramen icon
+│
 ```
 
 ### Basic Usage
