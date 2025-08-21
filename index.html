@@ -217,11 +217,11 @@
 
     /* Left Panel - Inputs */
     .inputs-panel {
-      padding: 3rem;
+      padding: 2rem;
       background: rgba(26, 26, 29, 0.95);
       border-right: 1px solid rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
-      flex: 0 0 400px;
+      flex: 0 0 380px;
     }
 
     @media (max-width: 1024px) {
@@ -232,7 +232,7 @@
     }
 
     .panel-title {
-      font-size: 1.875rem;
+      font-size: 1.75rem;
       font-weight: 800;
       color: var(--gray-100);
       margin-bottom: 0.5rem;
@@ -241,31 +241,35 @@
 
     .panel-subtitle {
       color: var(--gray-400);
-      margin-bottom: 3rem;
-      font-size: 1.125rem;
+      margin-bottom: 2rem;
+      font-size: 1rem;
     }
 
     .input-group {
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group.compact {
+      margin-bottom: 1rem;
     }
 
     .input-label {
       display: block;
       font-weight: 600;
       color: var(--gray-200);
-      margin-bottom: 1rem;
-      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
     }
 
     /* Modern Slider */
     .slider-container {
       position: relative;
-      padding: 1rem 0;
+      padding: 0.5rem 0;
     }
 
     .slider-wrapper {
       position: relative;
-      margin: 1rem 0 2rem 0;
+      margin: 0.5rem 0 1rem 0;
     }
 
     .slider {
@@ -323,8 +327,8 @@
     .slider-labels {
       display: flex;
       justify-content: space-between;
-      margin-top: 0.5rem;
-      font-size: 0.8rem;
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
       color: var(--gray-400);
     }
 
@@ -386,13 +390,13 @@
       background: #00FFD1;
       color: #0A0A0B;
       border: none;
-      padding: 1.25rem 2rem;
+      padding: 1rem 2rem;
       border-radius: 0.75rem;
       font-weight: 600;
-      font-size: 1.125rem;
+      font-size: 1rem;
       cursor: pointer;
       transition: all 0.2s ease;
-      margin-top: 2rem;
+      margin-top: 1.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -731,7 +735,7 @@
           <p class="panel-subtitle">Adjust the values below to see how your investments will grow</p>
 
           <!-- Current Age -->
-          <div class="input-group optional-field">
+          <div class="input-group compact optional-field">
             <label class="input-label optional-label">Current Age</label>
             <div class="input-stepper">
               <button class="stepper-btn" onclick="adjustValue('age', -1)">−</button>
@@ -747,6 +751,16 @@
               <button class="stepper-btn" onclick="adjustValue('monthly', -100)">−</button>
               <input type="text" class="stepper-input" id="monthlyInput" value="1,000" onchange="updateFromInput('monthly')" oninput="formatAndUpdate('monthly')" placeholder="0">
               <button class="stepper-btn" onclick="adjustValue('monthly', 100)">+</button>
+            </div>
+          </div>
+
+          <!-- Initial Investment -->
+          <div class="input-group compact optional-field">
+            <label class="input-label optional-label">Initial Investment (RM)</label>
+            <div class="input-stepper">
+              <button class="stepper-btn" onclick="adjustValue('initial', -1000)">−</button>
+              <input type="text" class="stepper-input" id="initialInput" value="0" onchange="updateFromInput('initial')" oninput="formatAndUpdate('initial')" placeholder="0">
+              <button class="stepper-btn" onclick="adjustValue('initial', 1000)">+</button>
             </div>
           </div>
 
@@ -781,7 +795,7 @@
           </div>
 
           <!-- Initial Investment -->
-          <div class="input-group optional-field">
+          <div class="input-group compact optional-field">
             <label class="input-label optional-label">Initial Investment (RM)</label>
             <div class="input-stepper">
               <button class="stepper-btn" onclick="adjustValue('initial', -1000)">−</button>
@@ -822,21 +836,21 @@
             <!-- NEW Equation Layout -->
             <div class="wealth-equation fade-in">
               <div class="equation-box invested">
-                <div class="equation-amount" id="totalContributed">RM 240,000</div>
+                <div class="equation-amount" id="eqTotalContributed">RM 240,000</div>
                 <div class="equation-label">Total Invested</div>
               </div>
               
               <div class="equation-operator">+</div>
               
               <div class="equation-box interest">
-                <div class="equation-amount" id="totalInterest">RM 360,000</div>
+                <div class="equation-amount" id="eqTotalInterest">RM 360,000</div>
                 <div class="equation-label">Interest Earned</div>
               </div>
               
               <div class="equation-operator equals">=</div>
               
               <div class="equation-box final">
-                <div class="equation-amount" id="finalAmount">RM 600,000</div>
+                <div class="equation-amount" id="eqFinalAmount">RM 600,000</div>
                 <div class="equation-label">Final Wealth</div>
               </div>
             </div>
@@ -1038,13 +1052,17 @@
           }
         }
 
-const totalInterest = balance - totalContributed;
+        const totalInterest = balance - totalContributed;
 
         // Update results
         document.getElementById('totalContributed').textContent = `RM ${Math.round(totalContributed).toLocaleString()}`;
         document.getElementById('totalInterest').textContent = `RM ${Math.round(totalInterest).toLocaleString()}`;
         document.getElementById('finalAmount').textContent = `RM ${Math.round(balance).toLocaleString()}`;
 
+        // Update equation layout
+        document.getElementById('eqTotalContributed').textContent = `RM ${Math.round(totalContributed).toLocaleString()}`;
+        document.getElementById('eqTotalInterest').textContent = `RM ${Math.round(totalInterest).toLocaleString()}`;
+        document.getElementById('eqFinalAmount').textContent = `RM ${Math.round(balance).toLocaleString()}`;
 
         // Update chart
         updateChart(dataPoints);
