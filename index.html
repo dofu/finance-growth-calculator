@@ -63,235 +63,157 @@
   <!-- Main Calculator -->
   <section class="calculator-section">
     <div class="calculator-card">
-      <!-- Dashboard Header -->
-      <div class="dashboard-header">
-        <h2 class="dashboard-title">Investment Calculator</h2>
-        <p class="dashboard-subtitle">See your wealth grow with smart investing</p>
-      </div>
+      <div class="calculator-grid">
+        <!-- Left Panel - Inputs -->
+        <div class="inputs-panel">
+          <h2 class="panel-title">Investment Parameters</h2>
+          <p class="panel-subtitle">Adjust the values below to see how your investments will grow</p>
 
-      <!-- Dashboard Grid -->
-      <div class="dashboard-grid">
-        <!-- Left Panel - Quick Setup -->
-        <div class="quick-setup-panel">
-          <div class="setup-card">
-            <h3 class="setup-title">Quick Setup</h3>
+          <!-- Current Age -->
+          <div class="input-group compact">
+            <label class="input-label optional-label">Current Age</label>
+            <div class="input-stepper">
+              <button class="stepper-btn" onclick="adjustValue('age', -1)">−</button>
+              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="25">
+              <button class="stepper-btn" onclick="adjustValue('age', 1)">+</button>
+            </div>
+          </div>
+
+          <!-- Monthly Investment -->
+          <div class="input-group">
+            <label class="input-label">Monthly Investment (RM)</label>
+            <div class="input-stepper">
+              <button class="stepper-btn" onclick="adjustValue('monthly', -100)">−</button>
+              <input type="text" class="stepper-input" id="monthlyInput" value="1,000" onchange="updateFromInput('monthly')" oninput="formatAndUpdate('monthly')" placeholder="0">
+              <button class="stepper-btn" onclick="adjustValue('monthly', 100)">+</button>
+            </div>
+          </div>
+
+          <!-- Initial Investment -->
+          <div class="input-group compact">
+            <label class="input-label optional-label">Initial Investment (RM)</label>
+            <div class="input-stepper">
+              <button class="stepper-btn" onclick="adjustValue('initial', -1000)">−</button>
+              <input type="text" class="stepper-input" id="initialInput" value="0" onchange="updateFromInput('initial')" oninput="formatAndUpdate('initial')" placeholder="0">
+              <button class="stepper-btn" onclick="adjustValue('initial', 1000)">+</button>
+            </div>
+          </div>
+
+          <!-- Annual Return -->
+          <div class="input-group">
+            <label class="input-label">Expected Annual Return (%)</label>
+            <div class="slider-container">
+              <div class="slider-wrapper">
+                <input type="range" class="slider" id="returnSlider" min="1" max="15" step="0.1" value="7" onchange="updateSlider()">
+                <div class="slider-value" id="returnValue">7.0%</div>
+              </div>
+              <div class="slider-labels">
+                <span>Conservative (3%)</span>
+                <span>Aggressive (12%)</span>
+              </div>
+            </div>
             
-            <!-- Monthly Investment -->
-            <div class="quick-input-group">
-              <label class="quick-label">Monthly Investment</label>
-              <div class="quick-input-wrapper">
-                <span class="currency-prefix">RM</span>
-                <input type="text" class="quick-input" id="quickMonthlyInput" value="1,000" onchange="updateFromQuickInput('monthly')" oninput="formatQuickInput('monthly')" placeholder="1,000">
-              </div>
-            </div>
-
-            <!-- Investment Period -->
-            <div class="quick-input-group">
-              <label class="quick-label">Investment Period</label>
-              <div class="quick-slider-wrapper">
-                <input type="range" class="quick-slider" id="quickYearsSlider" min="1" max="40" step="1" value="20" onchange="updateQuickSlider()">
-                <div class="quick-slider-value" id="quickYearsValue">20 Years</div>
-              </div>
-            </div>
-
-            <!-- Expected Returns -->
-            <div class="quick-input-group">
-              <label class="quick-label">Expected Returns</label>
-              <div class="quick-slider-wrapper">
-                <input type="range" class="quick-slider" id="quickReturnSlider" min="1" max="15" step="0.1" value="7" onchange="updateQuickSlider()">
-                <div class="quick-slider-value" id="quickReturnValue">7.0%</div>
-              </div>
-            </div>
-
-            <button class="quick-calculate-btn" onclick="calculate()">
-              Calculate My Wealth
-            </button>
-          </div>
-
-          <!-- Advanced Options Card -->
-          <div class="advanced-card">
-            <h4 class="advanced-title">Advanced Options</h4>
-            
-            <div class="advanced-option">
-              <label class="option-label">
-                <input type="checkbox" id="advancedMixToggle" onchange="toggleAdvancedMix()">
-                <span class="option-text">Investment Mix</span>
-                <span class="option-desc">Customize portfolio allocation</span>
+            <!-- Investment Mix Toggle -->
+            <div class="mix-toggle-container">
+              <label class="mix-toggle-label">
+                <input type="checkbox" id="mixToggle" onchange="toggleMix()">
+                <span class="mix-toggle-text">Use Investment Mix</span>
+                <span class="mix-toggle-subtitle">Set custom allocation across different investments</span>
               </label>
             </div>
-
-            <div class="advanced-option">
-              <label class="option-label">
-                <input type="checkbox" id="advancedEpfToggle" onchange="toggleAdvancedEpf()" checked>
-                <span class="option-text">Include EPF</span>
-                <span class="option-desc">Track EPF with investments</span>
-              </label>
-            </div>
-
-            <div class="advanced-option">
-              <label class="option-label">
-                <input type="checkbox" id="advancedAgeToggle" onchange="toggleAdvancedAge()">
-                <span class="option-text">Set Age</span>
-                <span class="option-desc">Track milestones by age</span>
-              </label>
-            </div>
-
-            <!-- Advanced Controls (Hidden by default) -->
-            <div id="advancedControls" class="advanced-controls hidden">
-              <!-- Quick EPF Setup -->
-              <div id="quickEpfSetup" class="quick-epf-setup">
-                <div class="quick-input-group compact">
-                  <label class="quick-label">Monthly Salary</label>
-                  <div class="quick-input-wrapper">
-                    <span class="currency-prefix">RM</span>
-                    <input type="text" class="quick-input small" id="quickSalaryInput" value="5,000" onchange="updateFromQuickInput('salary')" oninput="formatQuickInput('salary')">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Quick Age Setup -->
-              <div id="quickAgeSetup" class="quick-age-setup hidden">
-                <div class="quick-input-group compact">
-                  <label class="quick-label">Current Age</label>
-                  <div class="quick-input-wrapper">
-                    <input type="number" class="quick-input small" id="quickAgeInput" value="" onchange="updateFromQuickInput('age')" placeholder="25" min="18" max="80">
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
-        </div>
 
-        <!-- Right Panel - Results Preview -->
-        <div class="results-preview-panel">
-          <div class="preview-card">
-            <div id="previewBlankState" class="preview-blank-state">
-              <div class="preview-icon">💰</div>
-              <h3>Ready to Calculate?</h3>
-              <p>Enter your investment details and see your wealth projection instantly.</p>
-            </div>
-
-            <div id="previewResults" class="preview-results hidden">
-              <div class="preview-main">
-                <div class="preview-amount" id="previewFinalAmount">RM 524,000</div>
-                <div class="preview-label">Final Wealth</div>
-                <div class="preview-period" id="previewPeriodText">after 20 years</div>
-              </div>
-
-              <div class="preview-breakdown">
-                <div class="preview-item">
-                  <span class="preview-item-label">Total Invested:</span>
-                  <span class="preview-item-amount" id="previewInvested">RM 240,000</span>
-                </div>
-                <div class="preview-item">
-                  <span class="preview-item-label">Interest Earned:</span>
-                  <span class="preview-item-amount" id="previewInterest">RM 284,000</span>
-                </div>
-              </div>
-
-              <button class="view-details-btn" onclick="toggleDetailedView()">
-                <span id="detailsBtnText">View Detailed Breakdown</span>
-                <span class="btn-arrow">→</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Detailed Results (Expandable) -->
-      <div id="detailedResults" class="detailed-results hidden">
-        <!-- Investment Mix Controls (if enabled) -->
-        <div id="dashboardMixSection" class="dashboard-mix-section hidden">
-          <div class="mix-dashboard-card">
+          <!-- Investment Mix Section -->
+          <div id="mixSection" class="mix-section hidden">
             <div class="mix-header">
               <h4>Portfolio Allocation</h4>
               <div class="blended-return">
                 <span class="blended-label">Blended Return:</span>
-                <span class="blended-rate" id="dashboardBlendedRate">7.0%</span>
+                <span class="blended-rate" id="blendedRate">7.0%</span>
               </div>
             </div>
             
-            <div class="mix-grid">
+            <div class="mix-items">
               <!-- ETFs -->
-              <div class="mix-dashboard-item">
+              <div class="mix-item">
                 <div class="mix-checkbox">
-                  <input type="checkbox" id="dashboardEtfEnabled" checked onchange="toggleDashboardInvestmentType('etf')">
-                  <label for="dashboardEtfEnabled" class="dashboard-investment-label">
+                  <input type="checkbox" id="etfEnabled" checked onchange="toggleInvestmentType('etf')">
+                  <label for="etfEnabled" class="investment-label">
                     <span class="mix-name">ETFs</span>
                     <span class="mix-description">Index funds, sector ETFs</span>
                   </label>
                 </div>
-                <div class="mix-config" id="dashboardEtfConfig">
+                <div class="mix-config" id="etfConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="dashboardEtfReturnSlider" min="3" max="12" step="0.1" value="7.0" onchange="updateDashboardMixReturn('etf')">
-                    <span class="mix-return-rate" id="dashboardEtfReturnRate">7.0%</span>
+                    <input type="range" class="return-slider" id="etfReturnSlider" min="3" max="12" step="0.1" value="7.0" onchange="updateMixReturn('etf')">
+                    <span class="mix-return-rate" id="etfReturnRate">7.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="dashboardEtfSlider" min="0" max="100" step="5" value="40" onchange="updateDashboardMix()">
-                    <span class="mix-percentage" id="dashboardEtfPercentage">40%</span>
+                    <input type="range" class="mix-slider" id="etfSlider" min="0" max="100" step="5" value="40" onchange="updateMix()">
+                    <span class="mix-percentage" id="etfPercentage">40%</span>
                   </div>
                 </div>
               </div>
 
               <!-- Unit Trusts -->
-              <div class="mix-dashboard-item">
+              <div class="mix-item">
                 <div class="mix-checkbox">
-                  <input type="checkbox" id="dashboardUnitTrustEnabled" checked onchange="toggleDashboardInvestmentType('unitTrust')">
-                  <label for="dashboardUnitTrustEnabled" class="dashboard-investment-label">
+                  <input type="checkbox" id="unitTrustEnabled" checked onchange="toggleInvestmentType('unitTrust')">
+                  <label for="unitTrustEnabled" class="investment-label">
                     <span class="mix-name">Unit Trusts</span>
                     <span class="mix-description">Equity, bond, balanced funds</span>
                   </label>
                 </div>
-                <div class="mix-config" id="dashboardUnitTrustConfig">
+                <div class="mix-config" id="unitTrustConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="dashboardUnitTrustReturnSlider" min="2" max="15" step="0.1" value="6.0" onchange="updateDashboardMixReturn('unitTrust')">
-                    <span class="mix-return-rate" id="dashboardUnitTrustReturnRate">6.0%</span>
+                    <input type="range" class="return-slider" id="unitTrustReturnSlider" min="2" max="15" step="0.1" value="6.0" onchange="updateMixReturn('unitTrust')">
+                    <span class="mix-return-rate" id="unitTrustReturnRate">6.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="dashboardUnitTrustSlider" min="0" max="100" step="5" value="30" onchange="updateDashboardMix()">
-                    <span class="mix-percentage" id="dashboardUnitTrustPercentage">30%</span>
+                    <input type="range" class="mix-slider" id="unitTrustSlider" min="0" max="100" step="5" value="30" onchange="updateMix()">
+                    <span class="mix-percentage" id="unitTrustPercentage">30%</span>
                   </div>
                 </div>
               </div>
 
               <!-- Fixed Deposit -->
-              <div class="mix-dashboard-item">
+              <div class="mix-item">
                 <div class="mix-checkbox">
-                  <input type="checkbox" id="dashboardFdEnabled" checked onchange="toggleDashboardInvestmentType('fd')">
-                  <label for="dashboardFdEnabled" class="dashboard-investment-label">
+                  <input type="checkbox" id="fdEnabled" checked onchange="toggleInvestmentType('fd')">
+                  <label for="fdEnabled" class="investment-label">
                     <span class="mix-name">Fixed Deposit</span>
                     <span class="mix-description">Bank FDs, money market</span>
                   </label>
                 </div>
-                <div class="mix-config" id="dashboardFdConfig">
+                <div class="mix-config" id="fdConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="dashboardFdReturnSlider" min="2" max="5" step="0.1" value="3.5" onchange="updateDashboardMixReturn('fd')">
-                    <span class="mix-return-rate" id="dashboardFdReturnRate">3.5%</span>
+                    <input type="range" class="return-slider" id="fdReturnSlider" min="2" max="5" step="0.1" value="3.5" onchange="updateMixReturn('fd')">
+                    <span class="mix-return-rate" id="fdReturnRate">3.5%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="dashboardFdSlider" min="0" max="100" step="5" value="20" onchange="updateDashboardMix()">
-                    <span class="mix-percentage" id="dashboardFdPercentage">20%</span>
+                    <input type="range" class="mix-slider" id="fdSlider" min="0" max="100" step="5" value="20" onchange="updateMix()">
+                    <span class="mix-percentage" id="fdPercentage">20%</span>
                   </div>
                 </div>
               </div>
 
               <!-- Individual Stocks -->
-              <div class="mix-dashboard-item">
+              <div class="mix-item">
                 <div class="mix-checkbox">
-                  <input type="checkbox" id="dashboardStocksEnabled" checked onchange="toggleDashboardInvestmentType('stocks')">
-                  <label for="dashboardStocksEnabled" class="dashboard-investment-label">
+                  <input type="checkbox" id="stocksEnabled" checked onchange="toggleInvestmentType('stocks')">
+                  <label for="stocksEnabled" class="investment-label">
                     <span class="mix-name">Individual Stocks</span>
                     <span class="mix-description">Blue chips, growth stocks</span>
                   </label>
                 </div>
-                <div class="mix-config" id="dashboardStocksConfig">
+                <div class="mix-config" id="stocksConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="dashboardStocksReturnSlider" min="-5" max="20" step="0.1" value="10.0" onchange="updateDashboardMixReturn('stocks')">
-                    <span class="mix-return-rate" id="dashboardStocksReturnRate">10.0%</span>
+                    <input type="range" class="return-slider" id="stocksReturnSlider" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('stocks')">
+                    <span class="mix-return-rate" id="stocksReturnRate">10.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="dashboardStocksSlider" min="0" max="100" step="5" value="10" onchange="updateDashboardMix()">
-                    <span class="mix-percentage" id="dashboardStocksPercentage">10%</span>
+                    <input type="range" class="mix-slider" id="stocksSlider" min="0" max="100" step="5" value="10" onchange="updateMix()">
+                    <span class="mix-percentage" id="stocksPercentage">10%</span>
                   </div>
                 </div>
               </div>
@@ -299,62 +221,158 @@
 
             <div class="mix-total">
               <span class="total-label">Total Allocation:</span>
-              <span class="total-percentage" id="dashboardTotalPercentage">100%</span>
-              <span class="allocation-status" id="dashboardAllocationStatus">✓ Balanced</span>
+              <span class="total-percentage" id="totalPercentage">100%</span>
+              <span class="allocation-status" id="allocationStatus">✓ Balanced</span>
             </div>
           </div>
+
+          <!-- Time Period -->
+          <div class="input-group">
+            <label class="input-label">Investment Period (Years)</label>
+            <div class="slider-container">
+              <div class="slider-wrapper">
+                <input type="range" class="slider" id="yearsSlider" min="1" max="40" step="1" value="20" onchange="updateSlider()">
+                <div class="slider-value" id="yearsValue">20 Years</div>
+              </div>
+              <div class="slider-labels">
+                <span>Short (5Y)</span>
+                <span>Long (30Y)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- EPF Toggle -->
+          <div class="input-group">
+            <div class="epf-toggle-container">
+              <label class="epf-toggle-label">
+                <input type="checkbox" id="epfToggle" onchange="toggleEPF()" checked>
+                <span class="epf-toggle-text">Include EPF Contributions</span>
+                <span class="epf-toggle-subtitle">Track your EPF alongside investments</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- EPF Section -->
+          <div id="epfSection" class="epf-section">
+            <!-- Monthly Salary -->
+            <div class="input-group compact">
+              <label class="input-label">Monthly Salary (RM)</label>
+              <div class="input-stepper">
+                <button class="stepper-btn" onclick="adjustValue('salary', -500)">−</button>
+                <input type="text" class="stepper-input" id="salaryInput" value="5,000" onchange="updateFromInput('salary')" oninput="formatAndUpdate('salary')" placeholder="0">
+                <button class="stepper-btn" onclick="adjustValue('salary', 500)">+</button>
+              </div>
+            </div>
+
+            <!-- Current EPF Balance -->
+            <div class="input-group compact">
+              <label class="input-label optional-label">Current EPF Balance (RM)</label>
+              <div class="input-stepper">
+                <button class="stepper-btn" onclick="adjustValue('epfBalance', -5000)">−</button>
+                <input type="text" class="stepper-input" id="epfBalanceInput" value="50,000" onchange="updateFromInput('epfBalance')" oninput="formatAndUpdate('epfBalance')" placeholder="0">
+                <button class="stepper-btn" onclick="adjustValue('epfBalance', 5000)">+</button>
+              </div>
+            </div>
+
+            <!-- EPF Dividend Rate -->
+            <div class="input-group compact">
+              <label class="input-label">
+                EPF Dividend Rate (%)
+                <a href="https://www.kwsp.gov.my/en/others/resource-centre/dividend" target="_blank" class="epf-link">Check latest rates</a>
+              </label>
+              <div class="slider-container">
+                <div class="slider-wrapper">
+                  <input type="range" class="slider epf-slider" id="epfDividendSlider" min="3" max="8" step="0.1" value="5.5" onchange="updateSlider()">
+                  <div class="slider-value epf-value" id="epfDividendValue">5.5%</div>
+                </div>
+                <div class="slider-labels">
+                  <span>Conservative (3%)</span>
+                  <span>Historical (6%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="calculate-btn" onclick="calculate()">
+            Calculate My Wealth
+          </button>
         </div>
 
-        <!-- Chart and Progress Section -->
-        <div class="detailed-content">
-          <!-- Chart with Loading State -->
-          <div class="chart-container">
-            <div id="detailedLoadingStateChart" class="loading" style="display: none;">
-              <div class="spinner"></div>
-              <p>Calculating your financial future...</p>
-            </div>
-            <canvas id="detailedWealthChart" style="display: none;"></canvas>
+        <!-- Right Panel - Results -->
+        <div class="results-panel">
+          <div id="loadingState" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Calculating your financial future...</p>
           </div>
 
-          <!-- Equation Layout -->
-          <div class="wealth-equation fade-in">
-            <div class="equation-box invested">
-              <div class="equation-amount" id="detailedTotalContributed">RM 0</div>
-              <div class="equation-label">Total Invested</div>
-            </div>
-            
-            <div class="equation-operator">+</div>
-            
-            <div class="equation-box interest">
-              <div class="equation-amount" id="detailedTotalInterest">RM 0</div>
-              <div class="equation-label">Interest Earned</div>
-            </div>
-            
-            <div class="equation-operator equals">=</div>
-            
-            <div class="equation-box final">
-              <div class="equation-amount" id="detailedFinalAmount">RM 0</div>
-              <div class="equation-label">Final Wealth</div>
-            </div>
-          </div>
-
-          <!-- Progress Milestones -->
-          <div class="progress-section">
-            <h3>Your Wealth Journey</h3>
-            <div id="detailedProgressContainer">
-              <div class="progress-item">
-                <div class="progress-info">
-                  <div class="progress-year">Year 5</div>
-                  <span>First milestone</span>
+          <div id="resultsContent">
+            <!-- Chart with Blank State -->
+            <div class="chart-container">
+              <div id="blankState" class="blank-state">
+                <div class="blank-state-icon">
+                  <img class="gelatine" src="assets/img/blank-state-ramen.svg">
                 </div>
-                <div class="progress-amount">RM 0</div>
+                <h3>Ready to Calculate?</h3>
+                <p>Adjust your investment parameters on the left and click "Calculate My Wealth" to see your projected growth.</p>
+              </div>
+              <div id="loadingStateChart" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Calculating your financial future...</p>
+              </div>
+              <canvas id="wealthChart" style="display: none;"></canvas>
+            </div>
+
+            <!-- Equation Layout -->
+            <div class="wealth-equation fade-in">
+              <div class="equation-box invested">
+                <div class="equation-amount" id="eqTotalContributed">RM 0</div>
+                <div class="equation-label">Total Invested</div>
+              </div>
+              
+              <div class="equation-operator">+</div>
+              
+              <div class="equation-box interest">
+                <div class="equation-amount" id="eqTotalInterest">RM 0</div>
+                <div class="equation-label">Interest Earned</div>
+              </div>
+              
+              <div class="equation-operator equals">=</div>
+              
+              <div class="equation-box final">
+                <div class="equation-amount" id="eqFinalAmount">RM 0</div>
+                <div class="equation-label">Final Wealth</div>
+              </div>
+            </div>
+
+            <!-- Progress Milestones -->
+            <div class="progress-section">
+              <h3>Your Wealth Journey</h3>
+              <div id="progressContainer">
+                <div class="progress-item">
+                  <div class="progress-info">
+                    <div class="progress-year">Year 5</div>
+                    <span>First milestone</span>
+                  </div>
+                  <div class="progress-amount">RM 0</div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-info">
+                    <div class="progress-year">Year 10</div>
+                    <span>Building wealth</span>
+                  </div>
+                  <div class="progress-amount">RM 0</div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-info">
+                    <div class="progress-year">Year 20</div>
+                    <span>Investment goal</span>
+                  </div>
+                  <div class="progress-amount">RM 0</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </section></div>
       </div>
     </div>
   </section>
