@@ -542,7 +542,10 @@ function updateChart(dataPoints, includeEPF) {
             font: {
               size: 14,
               weight: 600
-            }
+            },
+            pointStyle: 'circle',
+            boxWidth: 4,  // Makes the legend circles smaller
+            boxHeight: 4  // Makes the legend circles smaller
           }
         },
         tooltip: {
