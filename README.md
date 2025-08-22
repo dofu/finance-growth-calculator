@@ -22,7 +22,7 @@ wealthgrow-calculator/
 ├── README.md                  # Project documentation
 ├── LICENSE                    # MIT License file
 │
-├── assets/
+└── assets/
     ├── css/
     │   └── styles.css         # All CSS styles
     │
