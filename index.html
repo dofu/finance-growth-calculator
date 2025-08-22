@@ -14,7 +14,7 @@
   <section class="hero">
     <div class="hero-content">
       <h1><span class="build-text">Build Your</span> <span class="gradient-text">Wealth</span></h1>
-      <p>Calculate how your investments compound over time. Start with as little as RM100/month and watch your wealth grow exponentially.</p>
+      <p>Calculate how your investments and EPF contributions compound over time. Start with as little as RM100/month and see your complete wealth projection including mandatory EPF savings.</p>
     </div>
   </section>
 
@@ -24,36 +24,36 @@
       <div class="instructions-header" onclick="toggleInstructions()">
         <h3>How It Works</h3>
         <button class="toggle-btn" id="toggleBtn">
-          <span class="toggle-icon">−</span>
+          <span class="toggle-icon">∓</span>
         </button>
       </div>
       <div class="instruction-steps" id="instructionSteps">
         <div class="step-item">
           <div class="step-icon">💰</div>
           <div class="step-content">
-            <h4>Set Monthly Amount</h4>
-            <p>Enter how much you plan to invest each month</p>
+            <h4>Set Investment Details</h4>
+            <p>Enter monthly investment amount and optional initial lump sum</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-icon">📈</div>
           <div class="step-content">
-            <h4>Choose Expected Returns</h4>
-            <p>Select your anticipated annual return rate (1-15%)</p>
+            <h4>Configure Returns & Timeline</h4>
+            <p>Adjust expected annual returns (1-15%) and investment period</p>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-icon">⏰</div>
+          <div class="step-icon">🏦</div>
           <div class="step-content">
-            <h4>Pick Timeline</h4>
-            <p>Set your investment period and optionally add your age</p>
+            <h4>Include EPF (Optional)</h4>
+            <p>Add your salary to track EPF contributions alongside investments</p>
           </div>
         </div>
         <div class="step-item">
           <div class="step-icon">🎯</div>
           <div class="step-content">
-            <h4>See Your Wealth Grow</h4>
-            <p>Watch compound interest build your financial future</p>
+            <h4>View Complete Projection</h4>
+            <p>See total wealth growth with EPF + investments breakdown</p>
           </div>
         </div>
       </div>
@@ -125,6 +125,58 @@
               <div class="slider-labels">
                 <span>Short (5Y)</span>
                 <span>Long (30Y)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- EPF Toggle -->
+          <div class="input-group">
+            <div class="epf-toggle-container">
+              <label class="epf-toggle-label">
+                <input type="checkbox" id="epfToggle" onchange="toggleEPF()" checked>
+                <span class="epf-toggle-text">Include EPF Contributions</span>
+                <span class="epf-toggle-subtitle">Track your EPF alongside investments</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- EPF Section -->
+          <div id="epfSection" class="epf-section">
+            <!-- Monthly Salary -->
+            <div class="input-group compact">
+              <label class="input-label">Monthly Salary (RM)</label>
+              <div class="input-stepper">
+                <button class="stepper-btn" onclick="adjustValue('salary', -500)">−</button>
+                <input type="text" class="stepper-input" id="salaryInput" value="5,000" onchange="updateFromInput('salary')" oninput="formatAndUpdate('salary')" placeholder="0">
+                <button class="stepper-btn" onclick="adjustValue('salary', 500)">+</button>
+              </div>
+            </div>
+
+            <!-- Current EPF Balance -->
+            <div class="input-group compact">
+              <label class="input-label optional-label">Current EPF Balance (RM)</label>
+              <div class="input-stepper">
+                <button class="stepper-btn" onclick="adjustValue('epfBalance', -5000)">−</button>
+                <input type="text" class="stepper-input" id="epfBalanceInput" value="50,000" onchange="updateFromInput('epfBalance')" oninput="formatAndUpdate('epfBalance')" placeholder="0">
+                <button class="stepper-btn" onclick="adjustValue('epfBalance', 5000)">+</button>
+              </div>
+            </div>
+
+            <!-- EPF Dividend Rate -->
+            <div class="input-group compact">
+              <label class="input-label">
+                EPF Dividend Rate (%)
+                <a href="https://www.kwsp.gov.my/en/others/resource-centre/dividend" target="_blank" class="epf-link">Check latest rates</a>
+              </label>
+              <div class="slider-container">
+                <div class="slider-wrapper">
+                  <input type="range" class="slider epf-slider" id="epfDividendSlider" min="3" max="8" step="0.1" value="5.5" onchange="updateSlider()">
+                  <div class="slider-value epf-value" id="epfDividendValue">5.5%</div>
+                </div>
+                <div class="slider-labels">
+                  <span>Conservative (3%)</span>
+                  <span>Historical (6%)</span>
+                </div>
               </div>
             </div>
           </div>
@@ -215,7 +267,7 @@
 
   <!-- Simple Instructions -->
   <div class="simple-instructions" style="display: none;">
-    <p>Set your monthly investment amount and expected annual return rate. Choose your investment timeline and optionally add your current age for milestone tracking. Click 'Calculate My Wealth' to see how compound interest grows your money over time.</p>
+    <p>Set your monthly investment amount, expected annual returns, and investment timeline. Optionally include your salary to track EPF contributions alongside your voluntary investments. The calculator shows your complete wealth projection with detailed breakdowns of investment growth, EPF accumulation, and milestone achievements over time.</p>
   </div>
 
   <!-- Footer -->
