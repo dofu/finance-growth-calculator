@@ -23,15 +23,14 @@ wealthgrow-calculator/
 ├── LICENSE                    # MIT License file
 │
 ├── assets/
-│   ├── css/
-│   │   └── styles.css         # All CSS styles
-│   │
-│   ├── js/
-│   │   └── calculator.js      # JavaScript functionality
-│   │
-│   └── img/
-│       └── blank-state-ramen.svg  # Animated ramen icon
-│
+    ├── css/
+    │   └── styles.css         # All CSS styles
+    │
+    ├── js/
+    │   └── calculator.js      # JavaScript functionality
+    │
+    └── img/
+         └── blank-state-ramen.svg  # Animated ramen icon
 ```
 
 ### Basic Usage
