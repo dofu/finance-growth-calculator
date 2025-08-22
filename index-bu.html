@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💰 WealthGrow - Smart Investment Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1><span class="build-text">Build Your</span> <span class="gradient-text">Wealth</span></h1>
+      <p>Calculate how your investments and EPF contributions compound over time. Start with as little as RM100/month and see your complete wealth projection including mandatory EPF savings.</p>
+    </div>
+  </section>
+
+  <!-- Instructions Section -->
+  <section class="instructions-banner">
+    <div class="instructions-content">
+      <div class="instructions-header" onclick="toggleInstructions()">
+        <h3>How It Works</h3>
+        <button class="toggle-btn" id="toggleBtn">
+          <span class="toggle-icon">∓</span>
+        </button>
+      </div>
+      <div class="instruction-steps" id="instructionSteps">
+        <div class="step-item">
+          <div class="step-icon">💰</div>
+          <div class="step-content">
+            <h4>Set Investment Details</h4>
+            <p>Enter monthly investment amount and optional initial lump sum</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">📈</div>
+          <div class="step-content">
+            <h4>Configure Returns & Timeline</h4>
+            <p>Adjust expected annual returns (1-15%) and investment period</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">🏦</div>
+          <div class="step-content">
+            <h4>Include EPF (Optional)</h4>
+            <p>Add your salary to track EPF contributions alongside investments</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">🎯</div>
+          <div class="step-content">
+            <h4>View Complete Projection</h4>
+            <p>See total wealth growth with EPF + investments breakdown</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Calculator -->
+  <section class="calculator-section">
+    <div class="calculator-card">
+      <div class="calculator-grid">
+        <!-- Left Panel - Inputs -->
+        <div class="inputs-panel">
+          <h2 class="panel-title">Investment Parameters</h2>
+          <p class="panel-subtitle">Adjust the values below to see how your investments will grow</p>
+
+          <!-- Current Age -->
+          <div class="input-group compact">
+            <label class="input-label optional-label">Current Age</label>
+            <div class="input-stepper">
+              <button class="stepper-btn" onclick="adjustValue('age', -1)">−</button>
+              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="25">
+              <button class="stepper-btn" onclick="adjustValue('age', 1)">+</button>
+            </div>
+          </div>
+
+          <!-- Monthly Investment -->
+          <div class="input-group">
+            <label class="input-label">Monthly Investment (RM)</label>
+            <div class="input-stepper">
+              <button class="stepper-btn" onclick="adjustValue('monthly', -100)">−</button>
+              <input type="text" class="stepper-input" id="monthlyInput" value="1,000" onchange="updateFromInput('monthly')" oninput="formatAndUpdate('monthly')" placeholder="0">
+              <button class="stepper-btn" onclick="adjustValue('monthly', 100)">+</button>
+            </div>
+          </div>
+
+          <!-- Initial Investment -->
+          <div class="input-group compact">
+            <label class="input-label optional-label">Initial Investment (RM)</label>
+            <div class="input-stepper">
+              <button class="stepper-btn" onclick="adjustValue('initial', -1000)">−</button>
+              <input type="text" class="stepper-input" id="initialInput" value="0" onchange="updateFromInput('initial')" oninput="formatAndUpdate('initial')" placeholder="0">
+              <button class="stepper-btn" onclick="adjustValue('initial', 1000)">+</button>
+            </div>
+          </div>
+
+          <!-- Annual Return -->
+          <div class="input-group">
+            <label class="input-label">Expected Annual Return (%)</label>
+            <div class="slider-container">
+              <div class="slider-wrapper">
+                <input type="range" class="slider" id="returnSlider" min="1" max="15" step="0.1" value="7" onchange="updateSlider()">
+                <div class="slider-value" id="returnValue">7.0%</div>
+              </div>
+              <div class="slider-labels">
+                <span>Conservative (3%)</span>
+                <span>Aggressive (12%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Time Period -->
+          <div class="input-group">
+            <label class="input-label">Investment Period (Years)</label>
+            <div class="slider-container">
+              <div class="slider-wrapper">
+                <input type="range" class="slider" id="yearsSlider" min="1" max="40" step="1" value="20" onchange="updateSlider()">
+                <div class="slider-value" id="yearsValue">20 Years</div>
+              </div>
+              <div class="slider-labels">
+                <span>Short (5Y)</span>
+                <span>Long (30Y)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- EPF Toggle -->
+          <div class="input-group">
+            <div class="epf-toggle-container">
+              <label class="epf-toggle-label">
+                <input type="checkbox" id="epfToggle" onchange="toggleEPF()" checked>
+                <span class="epf-toggle-text">Include EPF Contributions</span>
+                <span class="epf-toggle-subtitle">Track your EPF alongside investments</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- EPF Section -->
+          <div id="epfSection" class="epf-section">
+            <!-- Monthly Salary -->
+            <div class="input-group compact">
+              <label class="input-label">Monthly Salary (RM)</label>
+              <div class="input-stepper">
+                <button class="stepper-btn" onclick="adjustValue('salary', -500)">−</button>
+                <input type="text" class="stepper-input" id="salaryInput" value="5,000" onchange="updateFromInput('salary')" oninput="formatAndUpdate('salary')" placeholder="0">
+                <button class="stepper-btn" onclick="adjustValue('salary', 500)">+</button>
+              </div>
+            </div>
+
+            <!-- Current EPF Balance -->
+            <div class="input-group compact">
+              <label class="input-label optional-label">Current EPF Balance (RM)</label>
+              <div class="input-stepper">
+                <button class="stepper-btn" onclick="adjustValue('epfBalance', -5000)">−</button>
+                <input type="text" class="stepper-input" id="epfBalanceInput" value="50,000" onchange="updateFromInput('epfBalance')" oninput="formatAndUpdate('epfBalance')" placeholder="0">
+                <button class="stepper-btn" onclick="adjustValue('epfBalance', 5000)">+</button>
+              </div>
+            </div>
+
+            <!-- EPF Dividend Rate -->
+            <div class="input-group compact">
+              <label class="input-label">
+                EPF Dividend Rate (%)
+                <a href="https://www.kwsp.gov.my/en/others/resource-centre/dividend" target="_blank" class="epf-link">Check latest rates</a>
+              </label>
+              <div class="slider-container">
+                <div class="slider-wrapper">
+                  <input type="range" class="slider epf-slider" id="epfDividendSlider" min="3" max="8" step="0.1" value="5.5" onchange="updateSlider()">
+                  <div class="slider-value epf-value" id="epfDividendValue">5.5%</div>
+                </div>
+                <div class="slider-labels">
+                  <span>Conservative (3%)</span>
+                  <span>Historical (6%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="calculate-btn" onclick="calculate()">
+            Calculate My Wealth
+          </button>
+        </div>
+
+        <!-- Right Panel - Results -->
+        <div class="results-panel">
+          <div id="loadingState" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Calculating your financial future...</p>
+          </div>
+
+          <div id="resultsContent">
+            <!-- Chart with Blank State -->
+            <div class="chart-container">
+              <div id="blankState" class="blank-state">
+                <div class="blank-state-icon">
+                  <img class="gelatine" src="assets/img/blank-state-ramen.svg">
+                </div>
+                <h3>Ready to Calculate?</h3>
+                <p>Adjust your investment parameters on the left and click "Calculate My Wealth" to see your projected growth.</p>
+              </div>
+              <div id="loadingStateChart" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Calculating your financial future...</p>
+              </div>
+              <canvas id="wealthChart" style="display: none;"></canvas>
+            </div>
+
+            <!-- Equation Layout -->
+            <div class="wealth-equation fade-in">
+              <div class="equation-box invested">
+                <div class="equation-amount" id="eqTotalContributed">RM 0</div>
+                <div class="equation-label">Total Invested</div>
+              </div>
+              
+              <div class="equation-operator">+</div>
+              
+              <div class="equation-box interest">
+                <div class="equation-amount" id="eqTotalInterest">RM 0</div>
+                <div class="equation-label">Interest Earned</div>
+              </div>
+              
+              <div class="equation-operator equals">=</div>
+              
+              <div class="equation-box final">
+                <div class="equation-amount" id="eqFinalAmount">RM 0</div>
+                <div class="equation-label">Final Wealth</div>
+              </div>
+            </div>
+
+            <!-- Progress Milestones -->
+            <div class="progress-section">
+              <h3>Your Wealth Journey</h3>
+              <div id="progressContainer">
+                <div class="progress-item">
+                  <div class="progress-info">
+                    <div class="progress-year">Year 5</div>
+                    <span>First milestone</span>
+                  </div>
+                  <div class="progress-amount">RM 0</div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-info">
+                    <div class="progress-year">Year 10</div>
+                    <span>Building wealth</span>
+                  </div>
+                  <div class="progress-amount">RM 0</div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-info">
+                    <div class="progress-year">Year 20</div>
+                    <span>Investment goal</span>
+                  </div>
+                  <div class="progress-amount">RM 0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Simple Instructions -->
+  <div class="simple-instructions" style="display: none;">
+    <p>Set your monthly investment amount, expected annual returns, and investment timeline. Optionally include your salary to track EPF contributions alongside your voluntary investments. The calculator shows your complete wealth projection with detailed breakdowns of investment growth, EPF accumulation, and milestone achievements over time.</p>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>Vibed by Shin 2025</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/calculator.js"></script>
+</body>
+</html>
