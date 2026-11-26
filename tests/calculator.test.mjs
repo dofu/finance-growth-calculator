@@ -208,7 +208,8 @@ test('final wealth equals investments plus EPF (default inputs)', () => {
   const invest = futureValue(0, 1000, 7, 20);
   const epf = futureValue(50000, 1200, 5.5, 20);
   assert.equal(el('eqFinalAmount').textContent, rm(invest + epf));
-  assert.equal(el('eqTotalContributed').textContent, rm(1000 * 240 + 50000 + 1200 * 240));
+  assert.equal(el('partInvest').textContent, rm(1000 * 240));
+  assert.equal(el('partEpf').textContent, rm(50000 + 1200 * 240));
   assert.equal(el('eqFinalAmount').textContent, 'RM 1,193,511');
 });
 
@@ -217,15 +218,16 @@ test('without EPF only the investment is counted', () => {
   api.values.includeEPF = false;
   api.calculate();
   assert.equal(el('eqFinalAmount').textContent, rm(futureValue(0, 1000, 7, 20)));
-  assert.equal(el('eqTotalContributed').textContent, rm(240000));
+  assert.equal(el('partInvest').textContent, rm(240000));
+  assert.equal(el('partEpfRow').hidden, true);
 });
 
-test('total invested plus interest equals final wealth', () => {
+test('investments, EPF and growth add up to final wealth', () => {
   const { api, el } = load();
   Object.assign(api.values, { monthly: 750, initial: 20000, returnRate: 8.2, years: 33, salary: 7200, voluntaryEPF: 150 });
   api.calculate();
   const num = s => Number(s.replace(/[^\d-]/g, ''));
-  const diff = num(el('eqTotalContributed').textContent) + num(el('eqTotalInterest').textContent) - num(el('eqFinalAmount').textContent);
+  const diff = num(el('partInvest').textContent) + num(el('partEpf').textContent) + num(el('eqTotalInterest').textContent) - num(el('eqFinalAmount').textContent);
   assert.ok(Math.abs(diff) <= 1, `rounding gap ${diff}`);
 });
 
@@ -281,11 +283,13 @@ test('mix breakdown amounts add up to the milestone total', () => {
   assert.ok(Math.abs(parts.reduce((a, b) => a + b, 0) - total) <= parts.length);
 });
 
-test('the total invested is split into investments, EPF contributions and the EPF starting balance', () => {
+test('the summary names the period and splits EPF into contributions and today\'s balance', () => {
   const { api, el } = load();
+  api.values.age = 30;
   api.calculate();
-  assert.equal(el('eqContributedSplit').textContent,
-    'Total invested: RM 240,000 into your investments, RM 288,000 of EPF contributions and RM 50,000 already in EPF.');
+  assert.equal(el('summaryLabel').textContent, 'Final wealth after 20 years (age 50)');
+  assert.equal(el('partEpfNote').textContent, 'RM 288,000 contributions, RM 50,000 you have now');
+  assert.equal((el('summaryBar').innerHTML.match(/<span/g) || []).length, 3);
 });
 
 test('milestone captions state what was put in and what it grew by', () => {
@@ -294,5 +298,5 @@ test('milestone captions state what was put in and what it grew by', () => {
   api.calculate();
   const last = el('progressContainer').children.at(-1).innerHTML;
   const growth = futureValue(0, 1000, 7, 20) - 240000;
-  assert.match(last, new RegExp(`RM 240,000 put in, ${rm(growth)} growth`));
+  assert.match(last.replace(/<[^>]+>/g, ''), new RegExp(`RM 240,000 put in, ${rm(growth)} growth`));
 });

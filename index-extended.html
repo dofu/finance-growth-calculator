@@ -50,7 +50,7 @@
         <div class="step-item">
           <div class="step-content">
             <h4>View Complete Projection</h4>
-            <p>See interactive chart, wealth equation breakdown, and milestone achievements showing your total financial growth over time</p>
+            <p>See interactive chart, a breakdown of your final wealth, and milestone achievements showing your total financial growth over time</p>
           </div>
         </div>
       </div>
@@ -344,28 +344,17 @@
               <canvas id="wealthChart" style="display: none;" aria-label="Wealth growth over time chart"></canvas>
             </div>
 
-            <!-- Equation Layout -->
-            <div class="wealth-equation fade-in" role="region" aria-label="Wealth calculation summary">
-              <div class="equation-box invested">
-                <div class="equation-amount" id="eqTotalContributed" aria-label="Total invested amount">RM 0</div>
-                <div class="equation-label">Total Invested</div>
-              </div>
-              
-              <div class="equation-operator" aria-hidden="true">+</div>
-              
-              <div class="equation-box interest">
-                <div class="equation-amount" id="eqTotalInterest" aria-label="Total interest earned">RM 0</div>
-                <div class="equation-label">Interest Earned</div>
-              </div>
-              
-              <div class="equation-operator equals" aria-hidden="true">=</div>
-              
-              <div class="equation-box final">
-                <div class="equation-amount" id="eqFinalAmount" aria-label="Final wealth amount">RM 0</div>
-                <div class="equation-label">Final Wealth</div>
-              </div>
+            <!-- Wealth Summary -->
+            <div class="wealth-summary" role="region" aria-label="Wealth summary">
+              <div class="summary-label" id="summaryLabel">Final wealth</div>
+              <div class="summary-total" id="eqFinalAmount">RM 0</div>
+              <div class="summary-bar" id="summaryBar" role="img" aria-label="Split of final wealth"></div>
+              <ul class="summary-parts">
+                <li class="part-invest"><span class="swatch"></span><span class="part-name">Your investments</span><span class="part-amount" id="partInvest">RM 0</span></li>
+                <li class="part-epf" id="partEpfRow"><span class="swatch"></span><span class="part-name">EPF</span><span class="part-amount" id="partEpf">RM 0</span><span class="part-note" id="partEpfNote"></span></li>
+                <li class="part-growth"><span class="swatch"></span><span class="part-name">Growth</span><span class="part-amount" id="eqTotalInterest">RM 0</span></li>
+              </ul>
             </div>
-            <p class="equation-split" id="eqContributedSplit"></p>
 
             <!-- Updated Wealth Journey Section with collapsible container -->
             <div class="wealth-journey" role="region" aria-label="Wealth milestones">

@@ -523,21 +523,15 @@ function calculate() {
 
     const totalInterest = finalBalance - totalContributed;
 
-    const eqTotalContributedEl = document.getElementById('eqTotalContributed');
-    const eqTotalInterestEl = document.getElementById('eqTotalInterest');
-    const eqFinalAmountEl = document.getElementById('eqFinalAmount');
-    
-    if (eqTotalContributedEl) eqTotalContributedEl.textContent = `RM ${Math.round(totalContributed).toLocaleString()}`;
-    if (eqTotalInterestEl) eqTotalInterestEl.textContent = `RM ${Math.round(totalInterest).toLocaleString()}`;
-    if (eqFinalAmountEl) eqFinalAmountEl.textContent = `RM ${Math.round(finalBalance).toLocaleString()}`;
-
-    const splitEl = document.getElementById('eqContributedSplit');
-    if (splitEl) {
-      const rm = n => `RM ${Math.round(n).toLocaleString()}`;
-      splitEl.textContent = includeEPF
-        ? `Total invested: ${rm(totalInvestmentContributed)} into your investments, ${rm(epfData.totalContributed - epfBalance)} of EPF contributions and ${rm(epfBalance)} already in EPF.`
-        : `Total invested: ${rm(totalInvestmentContributed)} into your investments.`;
-    }
+    updateSummary({
+      years,
+      age,
+      invested: totalInvestmentContributed,
+      epfContributed: includeEPF ? epfData.totalContributed : 0,
+      epfStart: includeEPF ? epfBalance : 0,
+      growth: totalInterest,
+      finalBalance
+    });
 
     updateChart(combinedDataPoints, includeEPF);
     updateProgressMilestones(combinedDataPoints, age);
@@ -549,6 +543,29 @@ function calculate() {
     const resultsContent = document.getElementById('resultsContent');
     if (resultsContent) resultsContent.classList.add('fade-in');
   }, 500);
+}
+
+function updateSummary({ years, age, invested, epfContributed, epfStart, growth, finalBalance }) {
+  const rm = n => `RM ${Math.round(n).toLocaleString()}`;
+  const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  const after = `after ${years} year${years === 1 ? '' : 's'}${age !== null ? ` (age ${age + years})` : ''}`;
+  set('summaryLabel', `Final wealth ${after}`);
+  set('eqFinalAmount', rm(finalBalance));
+  set('partInvest', rm(invested));
+  set('partEpf', rm(epfContributed));
+  set('partEpfNote', epfContributed ? `${rm(epfContributed - epfStart)} contributions, ${rm(epfStart)} you have now` : '');
+  set('eqTotalInterest', rm(growth));
+
+  const epfRow = document.getElementById('partEpfRow');
+  if (epfRow) epfRow.hidden = !epfContributed;
+
+  const bar = document.getElementById('summaryBar');
+  if (bar) {
+    const parts = [['bar-invest', invested], ['bar-epf', epfContributed], ['bar-growth', Math.max(0, growth)]];
+    bar.innerHTML = parts.filter(([, v]) => v > 0)
+      .map(([cls, v]) => `<span class="${cls}" style="flex-grow: ${v}"></span>`).join('');
+    bar.setAttribute('aria-label', `Your investments ${rm(invested)}, EPF ${rm(epfContributed)}, growth ${rm(growth)}`);
+  }
 }
 
 function updateChart(dataPoints, includeEPF) {
@@ -570,8 +587,8 @@ function updateChart(dataPoints, includeEPF) {
     {
       label: 'Total Wealth',
       data: dataPoints.map(point => point.balance),
-      borderColor: '#FF6B9D',
-      backgroundColor: 'rgba(255, 107, 157, 0.1)',
+      borderColor: '#E0457B',
+      backgroundColor: 'rgba(224, 69, 123, 0.08)',
       borderWidth: 3,
       fill: true,
       tension: 0.4
@@ -582,8 +599,8 @@ function updateChart(dataPoints, includeEPF) {
     datasets.push({
       label: 'EPF Balance',
       data: dataPoints.map(point => point.epfBalance || 0),
-      borderColor: '#4ECDC4',
-      backgroundColor: 'rgba(78, 205, 196, 0.1)',
+      borderColor: '#3E6FC4',
+      backgroundColor: 'rgba(62, 111, 196, 0.08)',
       borderWidth: 2,
       fill: false,
       tension: 0.4
@@ -592,8 +609,8 @@ function updateChart(dataPoints, includeEPF) {
     datasets.push({
       label: 'Investment Balance',
       data: dataPoints.map(point => point.investmentBalance || 0),
-      borderColor: '#00FFD1',
-      backgroundColor: 'rgba(0, 255, 209, 0.1)',
+      borderColor: '#14998A',
+      backgroundColor: 'rgba(20, 153, 138, 0.08)',
       borderWidth: 2,
       fill: false,
       tension: 0.4
@@ -602,8 +619,8 @@ function updateChart(dataPoints, includeEPF) {
     datasets.push({
       label: 'Contributions',
       data: dataPoints.map(point => point.contributed),
-      borderColor: '#4ECDC4',
-      backgroundColor: 'rgba(78, 205, 196, 0.1)',
+      borderColor: '#14998A',
+      backgroundColor: 'rgba(20, 153, 138, 0.08)',
       borderWidth: 2,
       fill: false,
       tension: 0.4
@@ -716,7 +733,7 @@ function updateProgressMilestones(dataPoints, age) {
       `Year ${milestone.year}`;
     
     const putIn = milestone.totalContributed ?? milestone.contributed;
-    const description = `RM ${Math.round(putIn).toLocaleString()} put in, RM ${Math.round(milestone.balance - putIn).toLocaleString()} growth`;
+    const description = `<span class="amount">RM ${Math.round(putIn).toLocaleString()}</span> put in, <span class="amount">RM ${Math.round(milestone.balance - putIn).toLocaleString()}</span> growth`;
 
     const includeEPF = values.includeEPF && milestone.epfBalance;
     const useMix = values.useMix;
@@ -729,11 +746,11 @@ function updateProgressMilestones(dataPoints, age) {
       breakdownHtml = `
         <div class="progress-breakdown">
           <div class="breakdown-item investment">
-            <span class="breakdown-label">Investment Mix:</span>
+            <span class="breakdown-label">Your investments</span>
             <span class="breakdown-amount">RM ${Math.round(investmentAmount).toLocaleString()}</span>
           </div>
           <div class="breakdown-item epf">
-            <span class="breakdown-label">EPF Balance:</span>
+            <span class="breakdown-label">EPF</span>
             <span class="breakdown-amount">RM ${Math.round(epfAmount).toLocaleString()}</span>
           </div>
         </div>
@@ -745,11 +762,11 @@ function updateProgressMilestones(dataPoints, age) {
       breakdownHtml = `
         <div class="progress-breakdown">
           <div class="breakdown-item investment">
-            <span class="breakdown-label">Personal Investment:</span>
+            <span class="breakdown-label">Your investments</span>
             <span class="breakdown-amount">RM ${Math.round(investmentAmount).toLocaleString()}</span>
           </div>
           <div class="breakdown-item epf">
-            <span class="breakdown-label">EPF Balance:</span>
+            <span class="breakdown-label">EPF</span>
             <span class="breakdown-amount">RM ${Math.round(epfAmount).toLocaleString()}</span>
           </div>
         </div>
