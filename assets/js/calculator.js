@@ -15,21 +15,37 @@ let values = {
     etf: 40,
     unitTrust: 30,
     fd: 20,
-    stocks: 10
+    stocks: 10,
+    asb: 0,
+    reits: 0
   },
   mixReturns: {
     etf: 7.0,
     unitTrust: 6.0,
     fd: 3.5,
-    stocks: 10.0
+    stocks: 10.0,
+    asb: 5.75,
+    reits: 5.5
   },
   mixEnabled: {
     etf: true,
     unitTrust: true,
     fd: true,
-    stocks: true
+    stocks: true,
+    asb: false,
+    reits: false
   }
 };
+
+// Investment types in the mix, in display order
+const MIX_ASSETS = [
+  ['etf', 'ETFs'],
+  ['unitTrust', 'Unit Trusts'],
+  ['fd', 'Fixed Deposit'],
+  ['stocks', 'Individual Stocks'],
+  ['asb', 'ASB'],
+  ['reits', 'REITs']
+];
 
 function adjustValue(type, change) {
   if (type === 'age') {
@@ -276,136 +292,94 @@ function toggleMix() {
   
   if (values.useMix) {
     mixSection.classList.remove('hidden');
-    returnSlider.disabled = true;
-    returnSlider.style.opacity = '0.5';
+    setReturnGroupHidden(true);
     updateMixDisplay();
     calculateBlendedReturn();
   } else {
     mixSection.classList.add('hidden');
-    returnSlider.disabled = false;
-    returnSlider.style.opacity = '1';
+    setReturnGroupHidden(false);
     values.returnRate = parseFloat(returnSlider.value);
   }
   
   calculate();
 }
 
+function setReturnGroupHidden(hidden) {
+  const group = document.getElementById('returnGroup');
+  if (group) group.hidden = hidden;
+}
+
+// Keeps the shares of the ticked investments at 100% in steps of 5.
+// The share of `fixedKey` stays as set; the others are scaled to fill the rest.
+function rebalanceMix(fixedKey) {
+  const a = values.mixAllocations;
+  MIX_ASSETS.forEach(([k]) => { if (!values.mixEnabled[k]) a[k] = 0; });
+  const others = MIX_ASSETS.map(([k]) => k).filter(k => k !== fixedKey && values.mixEnabled[k]);
+  if (fixedKey && !others.length) { a[fixedKey] = 100; return; }
+  const target = 100 - (fixedKey ? a[fixedKey] : 0);
+  const sum = others.reduce((t, k) => t + a[k], 0);
+  others.forEach(k => {
+    a[k] = sum > 0 ? Math.round((a[k] / sum) * target / 5) * 5 : Math.floor(target / others.length / 5) * 5;
+  });
+  const largest = () => others.reduce((m, k) => (a[k] > a[m] ? k : m), others[0]);
+  let total = others.reduce((t, k) => t + a[k], 0);
+  while (total < target) { a[largest()] += 5; total += 5; }
+  while (total > target) { a[largest()] -= 5; total -= 5; }
+}
+
 function toggleInvestmentType(type) {
   const checkbox = document.getElementById(type + 'Enabled');
-  const config = document.getElementById(type + 'Config');
-  
-  values.mixEnabled[type] = checkbox.checked;
-  
-  if (checkbox.checked) {
-    config.classList.remove('disabled');
-  } else {
-    config.classList.add('disabled');
-    values.mixAllocations[type] = 0;
-    document.getElementById(type + 'Slider').value = 0;
+  const enabledCount = MIX_ASSETS.filter(([k]) => values.mixEnabled[k]).length;
+  if (!checkbox.checked && enabledCount === 1) {
+    checkbox.checked = true; // keep at least one investment in the mix
+    return;
   }
-  
+  values.mixEnabled[type] = checkbox.checked;
+  values.mixAllocations[type] = 0;
+  rebalanceMix(null);
   updateMixDisplay();
   calculateBlendedReturn();
   calculate();
 }
 
 function updateMixReturn(type) {
-  const sliderId = type + 'ReturnSlider';
-  const rateId = type + 'ReturnRate';
-  
-  const slider = document.getElementById(sliderId);
-  const rateDisplay = document.getElementById(rateId);
-  
-  if (slider && rateDisplay) {
-    const newRate = parseFloat(slider.value);
-    values.mixReturns[type] = newRate;
-    rateDisplay.textContent = newRate.toFixed(1) + '%';
-    
-    if (values.useMix) {
-      calculateBlendedReturn();
-      calculate();
-    }
+  const slider = document.getElementById(type + 'ReturnSlider');
+  if (!slider) return;
+  values.mixReturns[type] = parseFloat(slider.value);
+  updateMixDisplay();
+  if (values.useMix) {
+    calculateBlendedReturn();
+    calculate();
   }
 }
 
-function updateMix() {
-  values.mixAllocations.etf = parseInt(document.getElementById('etfSlider').value);
-  values.mixAllocations.unitTrust = parseInt(document.getElementById('unitTrustSlider').value);
-  values.mixAllocations.fd = parseInt(document.getElementById('fdSlider').value);
-  values.mixAllocations.stocks = parseInt(document.getElementById('stocksSlider').value);
-  
+function updateMix(type) {
+  const slider = document.getElementById(type + 'Slider');
+  if (!slider) return;
+  values.mixAllocations[type] = parseInt(slider.value, 10);
+  rebalanceMix(type);
   updateMixDisplay();
   calculateBlendedReturn();
   calculate();
 }
 
 function updateMixDisplay() {
-  document.getElementById('etfPercentage').textContent = values.mixAllocations.etf + '%';
-  document.getElementById('unitTrustPercentage').textContent = values.mixAllocations.unitTrust + '%';
-  document.getElementById('fdPercentage').textContent = values.mixAllocations.fd + '%';
-  document.getElementById('stocksPercentage').textContent = values.mixAllocations.stocks + '%';
-  
-  document.getElementById('etfReturnRate').textContent = values.mixReturns.etf.toFixed(1) + '%';
-  document.getElementById('unitTrustReturnRate').textContent = values.mixReturns.unitTrust.toFixed(1) + '%';
-  document.getElementById('fdReturnRate').textContent = values.mixReturns.fd.toFixed(1) + '%';
-  document.getElementById('stocksReturnRate').textContent = values.mixReturns.stocks.toFixed(1) + '%';
-  
-  document.getElementById('etfReturnSlider').value = values.mixReturns.etf;
-  document.getElementById('unitTrustReturnSlider').value = values.mixReturns.unitTrust;
-  document.getElementById('fdReturnSlider').value = values.mixReturns.fd;
-  document.getElementById('stocksReturnSlider').value = values.mixReturns.stocks;
-  
-  const total = values.mixAllocations.etf + values.mixAllocations.unitTrust + 
-                values.mixAllocations.fd + values.mixAllocations.stocks;
-  
-  document.getElementById('totalPercentage').textContent = total + '%';
-  
-  const statusEl = document.getElementById('allocationStatus');
-  if (total === 100) {
-    statusEl.textContent = 'Balanced';
-    statusEl.className = 'allocation-status balanced';
-  } else if (total < 100) {
-    statusEl.textContent = `${100 - total}% unallocated`;
-    statusEl.className = 'allocation-status warning';
-  } else {
-    statusEl.textContent = `${total - 100}% over-allocated`;
-    statusEl.className = 'allocation-status warning';
-  }
+  MIX_ASSETS.forEach(([k]) => {
+    const el = id => document.getElementById(k + id);
+    if (el('Percentage')) el('Percentage').textContent = values.mixAllocations[k] + '%';
+    if (el('Slider')) el('Slider').value = values.mixAllocations[k];
+    if (el('ReturnRate')) el('ReturnRate').textContent = values.mixReturns[k].toFixed(2).replace(/0$/, '') + '%';
+    if (el('ReturnSlider')) el('ReturnSlider').value = values.mixReturns[k];
+    if (el('Enabled')) el('Enabled').checked = values.mixEnabled[k];
+    if (el('Config')) el('Config').classList[values.mixEnabled[k] ? 'remove' : 'add']('disabled');
+  });
 }
 
 function calculateBlendedReturn() {
   if (!values.useMix) return;
-  
-  const { etf, unitTrust, fd, stocks } = values.mixAllocations;
-  const returns = values.mixReturns;
-  const enabled = values.mixEnabled;
-  
-  let totalAllocation = 0;
-  let weightedReturn = 0;
-  
-  if (enabled.etf && etf > 0) {
-    totalAllocation += etf;
-    weightedReturn += (etf / 100) * returns.etf;
-  }
-  if (enabled.unitTrust && unitTrust > 0) {
-    totalAllocation += unitTrust;
-    weightedReturn += (unitTrust / 100) * returns.unitTrust;
-  }
-  if (enabled.fd && fd > 0) {
-    totalAllocation += fd;
-    weightedReturn += (fd / 100) * returns.fd;
-  }
-  if (enabled.stocks && stocks > 0) {
-    totalAllocation += stocks;
-    weightedReturn += (stocks / 100) * returns.stocks;
-  }
-  
-  if (totalAllocation === 0) {
-    values.returnRate = 0;
-  } else {
-    values.returnRate = weightedReturn;
-  }
-  
+  values.returnRate = MIX_ASSETS.reduce((rate, [k]) =>
+    rate + (values.mixEnabled[k] ? (values.mixAllocations[k] / 100) * values.mixReturns[k] : 0), 0);
+
   const blendedRate = document.getElementById('blendedRate');
   if (blendedRate) {
     blendedRate.textContent = values.returnRate.toFixed(1) + '%';
@@ -773,59 +747,14 @@ function updateProgressMilestones(dataPoints, age) {
       `;
     } else if (useMix) {
       const totalInvestment = milestone.balance;
-      let mixBreakdown = '';
-      
-      if (values.mixEnabled.etf && values.mixAllocations.etf > 0) {
-        const etfAmount = totalInvestment * (values.mixAllocations.etf / 100);
-        mixBreakdown += `
-          <div class="breakdown-item mix-etf">
-            <span class="breakdown-label">ETFs (${values.mixAllocations.etf}%):</span>
-            <span class="breakdown-amount">RM ${Math.round(etfAmount).toLocaleString()}</span>
+      const mixBreakdown = MIX_ASSETS
+        .filter(([k]) => values.mixEnabled[k] && values.mixAllocations[k] > 0)
+        .map(([k, name]) => `
+          <div class="breakdown-item mix-${k}">
+            <span class="breakdown-label">${name} (${values.mixAllocations[k]}%)</span>
+            <span class="breakdown-amount">RM ${Math.round(totalInvestment * values.mixAllocations[k] / 100).toLocaleString()}</span>
           </div>
-        `;
-      }
-      
-      if (values.mixEnabled.unitTrust && values.mixAllocations.unitTrust > 0) {
-        const utAmount = totalInvestment * (values.mixAllocations.unitTrust / 100);
-        mixBreakdown += `
-          <div class="breakdown-item mix-ut">
-            <span class="breakdown-label">Unit Trusts (${values.mixAllocations.unitTrust}%):</span>
-            <span class="breakdown-amount">RM ${Math.round(utAmount).toLocaleString()}</span>
-          </div>
-        `;
-      }
-      
-      if (values.mixEnabled.fd && values.mixAllocations.fd > 0) {
-        const fdAmount = totalInvestment * (values.mixAllocations.fd / 100);
-        mixBreakdown += `
-          <div class="breakdown-item mix-fd">
-            <span class="breakdown-label">Fixed Deposit (${values.mixAllocations.fd}%):</span>
-            <span class="breakdown-amount">RM ${Math.round(fdAmount).toLocaleString()}</span>
-          </div>
-        `;
-      }
-      
-      if (values.mixEnabled.stocks && values.mixAllocations.stocks > 0) {
-        const stocksAmount = totalInvestment * (values.mixAllocations.stocks / 100);
-        mixBreakdown += `
-          <div class="breakdown-item mix-stocks">
-            <span class="breakdown-label">Individual Stocks (${values.mixAllocations.stocks}%):</span>
-            <span class="breakdown-amount">RM ${Math.round(stocksAmount).toLocaleString()}</span>
-          </div>
-        `;
-      }
-      
-      const allocated = Object.keys(values.mixAllocations)
-        .filter(k => values.mixEnabled[k])
-        .reduce((sum, k) => sum + values.mixAllocations[k], 0);
-      if (mixBreakdown && allocated < 100) {
-        mixBreakdown += `
-          <div class="breakdown-item mix-unallocated">
-            <span class="breakdown-label">Not allocated (${100 - allocated}%):</span>
-            <span class="breakdown-amount">RM ${Math.round(totalInvestment * (100 - allocated) / 100).toLocaleString()}</span>
-          </div>
-        `;
-      }
+        `).join('');
 
       if (mixBreakdown) {
         breakdownHtml = `<div class="progress-breakdown">${mixBreakdown}</div>`;

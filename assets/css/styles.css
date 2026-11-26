@@ -673,7 +673,7 @@ body {
   background: rgba(255, 107, 157, 0.05);
 }
 
-.breakdown-item.mix-ut {
+.breakdown-item.mix-unitTrust {
   background: rgba(0, 255, 209, 0.05);
 }
 
@@ -1108,44 +1108,11 @@ body {
   text-align: right;
 }
 
-.mix-total {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 107, 157, 0.2);
-}
-
-.total-label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--gray-200);
-}
-
-.total-percentage {
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--gray-100);
-}
-
-.allocation-status {
+.mix-note {
   font-size: 0.8rem;
-  font-weight: 500;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-}
-
-.allocation-status.balanced {
-  color: var(--success-600);
-  background: rgba(78, 205, 196, 0.1);
-  border: 1px solid rgba(78, 205, 196, 0.3);
-}
-
-.allocation-status.warning {
-  color: var(--accent-yellow);
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--gray-400);
+  margin: -0.5rem 0 1rem;
+  line-height: 1.4;
 }
 
 /* Simple Instructions */

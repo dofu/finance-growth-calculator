@@ -97,7 +97,7 @@
           </div>
 
           <!-- Annual Return -->
-          <div class="input-group">
+          <div class="input-group" id="returnGroup">
             <label for="returnSlider" class="input-label">Expected Annual Return (%)</label>
             <div class="slider-container">
               <div class="slider-wrapper">
@@ -129,6 +129,7 @@
                 <span class="blended-rate" id="blendedRate" aria-live="polite">7.0%</span>
               </div>
             </div>
+            <p class="mix-note">Shares always add up to 100%: moving one adjusts the others. The blended return replaces the single return rate.</p>
             
             <div class="mix-items">
               <!-- ETFs -->
@@ -148,7 +149,7 @@
                   </div>
                   <div class="mix-allocation">
                     <span class="mix-control-label" aria-hidden="true">Share</span>
-                    <input type="range" class="mix-slider" id="etfSlider" min="0" max="100" step="5" value="40" onchange="updateMix()" aria-label="ETF allocation percentage">
+                    <input type="range" class="mix-slider" id="etfSlider" min="0" max="100" step="5" value="40" onchange="updateMix('etf')" aria-label="ETF allocation percentage">
                     <span class="mix-percentage" id="etfPercentage" aria-live="polite">40%</span>
                   </div>
                 </div>
@@ -171,7 +172,7 @@
                   </div>
                   <div class="mix-allocation">
                     <span class="mix-control-label" aria-hidden="true">Share</span>
-                    <input type="range" class="mix-slider" id="unitTrustSlider" min="0" max="100" step="5" value="30" onchange="updateMix()" aria-label="Unit trust allocation percentage">
+                    <input type="range" class="mix-slider" id="unitTrustSlider" min="0" max="100" step="5" value="30" onchange="updateMix('unitTrust')" aria-label="Unit trust allocation percentage">
                     <span class="mix-percentage" id="unitTrustPercentage" aria-live="polite">30%</span>
                   </div>
                 </div>
@@ -194,7 +195,7 @@
                   </div>
                   <div class="mix-allocation">
                     <span class="mix-control-label" aria-hidden="true">Share</span>
-                    <input type="range" class="mix-slider" id="fdSlider" min="0" max="100" step="5" value="20" onchange="updateMix()" aria-label="Fixed deposit allocation percentage">
+                    <input type="range" class="mix-slider" id="fdSlider" min="0" max="100" step="5" value="20" onchange="updateMix('fd')" aria-label="Fixed deposit allocation percentage">
                     <span class="mix-percentage" id="fdPercentage" aria-live="polite">20%</span>
                   </div>
                 </div>
@@ -217,17 +218,55 @@
                   </div>
                   <div class="mix-allocation">
                     <span class="mix-control-label" aria-hidden="true">Share</span>
-                    <input type="range" class="mix-slider" id="stocksSlider" min="0" max="100" step="5" value="10" onchange="updateMix()" aria-label="Stocks allocation percentage">
+                    <input type="range" class="mix-slider" id="stocksSlider" min="0" max="100" step="5" value="10" onchange="updateMix('stocks')" aria-label="Stocks allocation percentage">
                     <span class="mix-percentage" id="stocksPercentage" aria-live="polite">10%</span>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div class="mix-total">
-              <span class="total-label">Total Allocation:</span>
-              <span class="total-percentage" id="totalPercentage" aria-live="polite">100%</span>
-              <span class="allocation-status" id="allocationStatus" aria-live="polite">Balanced</span>
+              <!-- ASB -->
+              <div class="mix-item">
+                <div class="mix-checkbox">
+                  <input type="checkbox" id="asbEnabled" onchange="toggleInvestmentType('asb')">
+                  <label for="asbEnabled" class="investment-label">
+                    <span class="mix-name">ASB</span>
+                    <span class="mix-description">Amanah Saham Bumiputera, for Bumiputera investors. 2025 payout: 5.75%</span>
+                  </label>
+                </div>
+                <div class="mix-config disabled" id="asbConfig">
+                  <div class="mix-return-control">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="asbReturnSlider" min="3" max="8" step="0.05" value="5.75" onchange="updateMixReturn('asb')" aria-label="ASB return rate">
+                    <span class="mix-return-rate" id="asbReturnRate" aria-live="polite">5.75%</span>
+                  </div>
+                  <div class="mix-allocation">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="asbSlider" min="0" max="100" step="5" value="0" onchange="updateMix('asb')" aria-label="ASB allocation percentage">
+                    <span class="mix-percentage" id="asbPercentage" aria-live="polite">0%</span>
+                  </div>
+                </div>
+              </div>
+              <!-- REITs -->
+              <div class="mix-item">
+                <div class="mix-checkbox">
+                  <input type="checkbox" id="reitsEnabled" onchange="toggleInvestmentType('reits')">
+                  <label for="reitsEnabled" class="investment-label">
+                    <span class="mix-name">REITs</span>
+                    <span class="mix-description">Bursa-listed property trusts. Recent index dividend yield: about 5.5%</span>
+                  </label>
+                </div>
+                <div class="mix-config disabled" id="reitsConfig">
+                  <div class="mix-return-control">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="reitsReturnSlider" min="2" max="10" step="0.05" value="5.5" onchange="updateMixReturn('reits')" aria-label="REITs return rate">
+                    <span class="mix-return-rate" id="reitsReturnRate" aria-live="polite">5.5%</span>
+                  </div>
+                  <div class="mix-allocation">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="reitsSlider" min="0" max="100" step="5" value="0" onchange="updateMix('reits')" aria-label="REITs allocation percentage">
+                    <span class="mix-percentage" id="reitsPercentage" aria-live="polite">0%</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

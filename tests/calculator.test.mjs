@@ -50,7 +50,7 @@ function load({ missing = [] } = {}) {
   vm.createContext(context);
   vm.runInContext(SOURCE + `
     ;globalThis.__api = { get values() { return values; }, adjustValue, formatAndUpdate,
-      updateFromInput, calculateEPF, calculateBlendedReturn, calculate };`, context);
+      updateFromInput, calculateEPF, calculateBlendedReturn, calculate, updateMix, toggleInvestmentType };`, context);
   return { api: context.__api, el: get, charts };
 }
 
@@ -113,12 +113,53 @@ test('blended return weights each enabled asset by its allocation', () => {
   assert.ok(Math.abs(api.values.returnRate - 6.3) < 1e-9);
 });
 
-test('blended return skips disabled assets and leaves unallocated money at 0%', () => {
-  const { api } = load();
+const shares = api => Object.values(api.values.mixAllocations).reduce((a, b) => a + b, 0);
+
+test('moving one share adjusts the others so the mix stays at 100%', () => {
+  const { api, el } = load();
   api.values.useMix = true;
-  api.values.mixEnabled.stocks = false;
-  api.calculateBlendedReturn();
-  assert.ok(Math.abs(api.values.returnRate - 5.3) < 1e-9);
+  el('etfSlider').value = '70';
+  api.updateMix('etf');
+  assert.equal(api.values.mixAllocations.etf, 70);
+  assert.equal(shares(api), 100);
+  // the others keep their order (30 : 20 : 10)
+  const { unitTrust, fd, stocks } = api.values.mixAllocations;
+  assert.ok(unitTrust >= fd && fd >= stocks, `${unitTrust} ${fd} ${stocks}`);
+});
+
+test('one investment at 100% leaves no share for the rest and no inflated return', () => {
+  const { api, el } = load();
+  api.values.useMix = true;
+  el('etfSlider').value = '100';
+  api.updateMix('etf');
+  assert.equal(shares(api), 100);
+  assert.equal(api.values.returnRate, 7);
+});
+
+test('unticking an investment hands its share to the others', () => {
+  const { api, el } = load();
+  api.values.useMix = true;
+  el('stocksEnabled').checked = false;
+  api.toggleInvestmentType('stocks');
+  assert.equal(api.values.mixAllocations.stocks, 0);
+  assert.equal(shares(api), 100);
+});
+
+test('the last ticked investment cannot be unticked', () => {
+  const { api, el } = load();
+  for (const k of ['unitTrust', 'fd', 'stocks']) { el(k + 'Enabled').checked = false; api.toggleInvestmentType(k); }
+  el('etfEnabled').checked = false;
+  api.toggleInvestmentType('etf');
+  assert.equal(api.values.mixEnabled.etf, true);
+  assert.equal(api.values.mixAllocations.etf, 100);
+});
+
+test('ASB and REITs start unticked with sourced default rates', () => {
+  const { api } = load();
+  assert.equal(api.values.mixEnabled.asb, false);
+  assert.equal(api.values.mixEnabled.reits, false);
+  assert.equal(api.values.mixReturns.asb, 5.75);
+  assert.equal(api.values.mixReturns.reits, 5.5);
 });
 
 test('blended return is 0 when nothing is allocated', () => {
@@ -274,8 +315,8 @@ test('the calculation works on V1, which has no voluntary EPF field or breakdown
 test('mix breakdown amounts add up to the milestone total', () => {
   const { api, el } = load();
   Object.assign(api.values, { useMix: true, includeEPF: false });
-  api.values.mixAllocations.fd = 0; // 90% allocated
-  api.calculateBlendedReturn();
+  el('fdSlider').value = '35';
+  api.updateMix('fd');
   api.calculate();
   const item = el('progressContainer').children.at(-1).innerHTML;
   const total = Number(item.match(/progress-amount">RM ([\d,]+)/)[1].replace(/,/g, ''));
