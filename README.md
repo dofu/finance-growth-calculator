@@ -1,8 +1,6 @@
 # 💰 Finance Growth Calculator
 
-V1: https://dofu.github.io/finance-growth-calculator/
-
-V2 - Extended: https://dofu.github.io/finance-growth-calculator/index-extended.html
+Live: https://dofu.github.io/finance-growth-calculator/
 
 A compound interest calculator that helps users visualise how their investments grow over time. 
 
