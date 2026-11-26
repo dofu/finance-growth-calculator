@@ -202,28 +202,28 @@ function updateInputs() {
   updateEPFRateInfo();
 }
 
+const EPF_EMPLOYEE_RATE = 0.11;
+
+// Employer share: 13% for a salary of RM 5,000 or less, 12% above
+function epfEmployerRate(salary) {
+  return salary <= 5000 ? 0.13 : 0.12;
+}
+
 function updateEPFRateInfo() {
   const epfRateInfo = document.getElementById('epfRateInfo');
   if (!epfRateInfo) return;
-  
-  const employmentContribution = values.salary <= 5000 ? 
-    values.salary * 0.24 : values.salary * 0.23;
-  const voluntaryContribution = values.voluntaryEPF;
-  const totalMonthlyEPF = employmentContribution + voluntaryContribution;
-  
-  if (values.salary <= 5000) {
-    epfRateInfo.innerHTML = `
-      Employment EPF: 24% (RM ${Math.round(employmentContribution).toLocaleString()})<br>
-      ${voluntaryContribution > 0 ? `Voluntary EPF: RM ${Math.round(voluntaryContribution).toLocaleString()}<br>` : ''}
-      <strong>Total Monthly EPF: RM ${Math.round(totalMonthlyEPF).toLocaleString()}</strong>
-    `;
-  } else {
-    epfRateInfo.innerHTML = `
-      Employment EPF: 23% (RM ${Math.round(employmentContribution).toLocaleString()})<br>
-      ${voluntaryContribution > 0 ? `Voluntary EPF: RM ${Math.round(voluntaryContribution).toLocaleString()}<br>` : ''}
-      <strong>Total Monthly EPF: RM ${Math.round(totalMonthlyEPF).toLocaleString()}</strong>
-    `;
-  }
+
+  const rm = n => `RM ${Math.round(n).toLocaleString()}`;
+  const employerRate = epfEmployerRate(values.salary);
+  const fromYou = values.salary * EPF_EMPLOYEE_RATE;
+  const fromEmployer = values.salary * employerRate;
+  const voluntary = values.voluntaryEPF;
+
+  epfRateInfo.innerHTML = `
+    You ${EPF_EMPLOYEE_RATE * 100}%: ${rm(fromYou)} + employer ${Math.round(employerRate * 100)}%: ${rm(fromEmployer)}<br>
+    ${voluntary > 0 ? `Voluntary: ${rm(voluntary)}<br>` : ''}
+    <strong>Into EPF each month: ${rm(fromYou + fromEmployer + voluntary)}</strong>
+  `;
 }
 
 function updateDisplays() {
@@ -386,18 +386,82 @@ function calculateBlendedReturn() {
   }
 }
 
+// Typical yearly swing (standard deviation, in percentage points) of each investment type,
+// from long-run market history. Used only for the likely range.
+const MIX_SWING = { etf: 15, unitTrust: 12, fd: 0.5, stocks: 20, asb: 0.5, reits: 15 };
+const MIX_CORRELATION = 0.6; // how closely different investment types move together
+const EPF_SWING = 0.5;
+const SIM_RUNS = 2000;
+
+// Yearly swing of the investment part: from the mix, or, for a single rate,
+// twice its margin over a 3% fixed deposit (7% swings about 8 points, 12% about 18)
+function investmentSwing() {
+  if (!values.useMix) return Math.max(0.5, (values.returnRate - 3) * 2);
+  const keys = MIX_ASSETS.map(([k]) => k).filter(k => values.mixEnabled[k] && values.mixAllocations[k] > 0);
+  let variance = 0;
+  keys.forEach(i => keys.forEach(j => {
+    const weight = (values.mixAllocations[i] / 100) * (values.mixAllocations[j] / 100);
+    variance += weight * MIX_SWING[i] * MIX_SWING[j] * (i === j ? 1 : MIX_CORRELATION);
+  }));
+  return Math.sqrt(variance);
+}
+
+// Small seeded generator so the same inputs always give the same range
+function seededRandom(seed) {
+  return () => {
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function randomNormal(rand) {
+  return Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(2 * Math.PI * rand());
+}
+
+// Runs the plan many times, drawing a different return for every year, and
+// returns per year the middle outcome of investments and EPF and the 10th and
+// 90th percentile of the total.
+function simulateRange({ years, initial, monthly, rate, swing, epf }) {
+  const rand = seededRandom(20251);
+  const inv = [], ep = [], tot = [];
+  for (let y = 0; y < years; y++) {
+    inv.push(new Float64Array(SIM_RUNS));
+    ep.push(new Float64Array(SIM_RUNS));
+    tot.push(new Float64Array(SIM_RUNS));
+  }
+  for (let run = 0; run < SIM_RUNS; run++) {
+    let invBalance = initial;
+    let epfBalance = epf ? epf.start : 0;
+    for (let y = 0; y < years; y++) {
+      const invRate = Math.max(-95, rate + swing * randomNormal(rand)) / 100 / 12;
+      for (let m = 0; m < 12; m++) invBalance = invBalance * (1 + invRate) + monthly;
+      if (epf) {
+        const epfRate = Math.max(0, epf.rate + EPF_SWING * randomNormal(rand)) / 100 / 12;
+        for (let m = 0; m < 12; m++) epfBalance = epfBalance * (1 + epfRate) + epf.monthly;
+      }
+      inv[y][run] = invBalance;
+      ep[y][run] = epfBalance;
+      tot[y][run] = invBalance + epfBalance;
+    }
+  }
+  const pick = (arr, q) => arr.sort()[Math.floor(q * (SIM_RUNS - 1))];
+  return inv.map((_, y) => ({
+    investment: pick(inv[y], 0.5),
+    epf: pick(ep[y], 0.5),
+    low: pick(tot[y], 0.1),
+    high: pick(tot[y], 0.9)
+  }));
+}
+
 function calculateEPF(salary, currentBalance, voluntaryEPF, dividendRate, years) {
   // EPF contribution rates based on salary threshold
-  let employmentRate;
-  if (salary <= 5000) {
-    // RM 5,000 and below: Employee 11% + Employer 13% = 24%
-    employmentRate = 0.24;
-  } else {
-    // More than RM 5,000: Employee 11% + Employer 12% = 23%
-    employmentRate = 0.23;
-  }
-  
-  const monthlyEmploymentContribution = salary * employmentRate;
+  const employerRate = epfEmployerRate(salary);
+  const employmentRate = Math.round((EPF_EMPLOYEE_RATE + employerRate) * 100) / 100;
+  const monthlyEmployeeContribution = salary * EPF_EMPLOYEE_RATE;
+  const monthlyEmployerContribution = salary * employerRate;
+  const monthlyEmploymentContribution = monthlyEmployeeContribution + monthlyEmployerContribution;
   const monthlyVoluntaryContribution = voluntaryEPF;
   const totalMonthlyContribution = monthlyEmploymentContribution + monthlyVoluntaryContribution;
   
@@ -425,6 +489,8 @@ function calculateEPF(salary, currentBalance, voluntaryEPF, dividendRate, years)
     totalContributed: currentBalance + (totalMonthlyContribution * totalMonths),
     dataPoints: dataPoints,
     monthlyEmploymentContribution: monthlyEmploymentContribution,
+    monthlyEmployeeContribution: monthlyEmployeeContribution,
+    monthlyEmployerContribution: monthlyEmployerContribution,
     monthlyVoluntaryContribution: monthlyVoluntaryContribution,
     totalMonthlyContribution: totalMonthlyContribution,
     employmentRate: employmentRate
@@ -445,6 +511,9 @@ function calculate() {
   blankState.style.display = 'none';
   wealthChart.style.display = 'none';
   loadingStateChart.style.display = 'flex';
+
+  const resultsArea = document.getElementById('resultsContent');
+  if (resultsArea) resultsArea.classList.add('is-updating');
 
   setTimeout(() => {
     const { age, monthly, initial, returnRate, years, salary, epfBalance, epfDividendRate, includeEPF } = values;
@@ -495,6 +564,29 @@ function calculate() {
       totalContributed = totalInvestmentContributed + epfData.totalContributed;
     }
 
+    const averageBalance = finalBalance;
+    const range = simulateRange({
+      years,
+      initial,
+      monthly,
+      rate: returnRate,
+      swing: investmentSwing(),
+      epf: includeEPF ? { start: epfBalance, rate: epfDividendRate, monthly: epfData.totalMonthlyContribution } : null
+    });
+
+    // Chart, milestones and summary follow the middle outcome
+    combinedDataPoints = combinedDataPoints.map((point, i) => ({
+      ...point,
+      average: point.balance,
+      balance: range[i].investment + (includeEPF ? range[i].epf : 0),
+      investmentBalance: range[i].investment,
+      epfBalance: includeEPF ? range[i].epf : undefined,
+      low: range[i].low,
+      high: range[i].high
+    }));
+    const last = combinedDataPoints[combinedDataPoints.length - 1];
+    finalBalance = last.balance;
+
     const totalInterest = finalBalance - totalContributed;
 
     updateSummary({
@@ -503,8 +595,12 @@ function calculate() {
       invested: totalInvestmentContributed,
       epfContributed: includeEPF ? epfData.totalContributed : 0,
       epfStart: includeEPF ? epfBalance : 0,
+      epfFromYou: includeEPF ? (epfData.monthlyEmployeeContribution + epfData.monthlyVoluntaryContribution) * years * 12 : 0,
       growth: totalInterest,
-      finalBalance
+      finalBalance,
+      averageBalance,
+      low: last.low,
+      high: last.high
     });
 
     updateChart(combinedDataPoints, includeEPF);
@@ -515,19 +611,35 @@ function calculate() {
     if (wealthChart) wealthChart.style.display = 'block';
     
     const resultsContent = document.getElementById('resultsContent');
-    if (resultsContent) resultsContent.classList.add('fade-in');
+    if (resultsContent) {
+      resultsContent.classList.add('fade-in');
+      resultsContent.classList.remove('is-updating');
+      flashUpdated(resultsContent.querySelectorAll('.summary-total, .progress-amount'));
+    }
   }, 500);
 }
 
-function updateSummary({ years, age, invested, epfContributed, epfStart, growth, finalBalance }) {
+// Briefly highlights figures that were just recalculated
+function flashUpdated(elements) {
+  elements.forEach(el => {
+    el.classList.remove('just-updated');
+    void el.offsetWidth; // restart the animation
+    el.classList.add('just-updated');
+  });
+}
+
+function updateSummary({ years, age, invested, epfContributed, epfStart, epfFromYou, growth, finalBalance, averageBalance, low, high }) {
   const rm = n => `RM ${Math.round(n).toLocaleString()}`;
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   const after = `after ${years} year${years === 1 ? '' : 's'}${age !== null ? ` (age ${age + years})` : ''}`;
-  set('summaryLabel', `Final wealth ${after}`);
+  set('summaryLabel', `Likely final wealth ${after}`);
   set('eqFinalAmount', rm(finalBalance));
+  set('summaryRange', `8 in 10 outcomes land between ${rm(low)} and ${rm(high)}. If every year paid exactly the average: ${rm(averageBalance)}.`);
   set('partInvest', rm(invested));
   set('partEpf', rm(epfContributed));
-  set('partEpfNote', epfContributed ? `${rm(epfContributed - epfStart)} contributions, ${rm(epfStart)} you have now` : '');
+  set('partEpfNote', epfContributed
+    ? `${rm(epfFromYou)} from your salary, ${rm(epfContributed - epfStart - epfFromYou)} from your employer, ${rm(epfStart)} you have now`
+    : '');
   set('eqTotalInterest', rm(growth));
 
   const epfRow = document.getElementById('partEpfRow');
@@ -564,7 +676,26 @@ function updateChart(dataPoints, includeEPF) {
       borderColor: '#E0457B',
       backgroundColor: 'rgba(224, 69, 123, 0.08)',
       borderWidth: 3,
-      fill: true,
+      fill: false,
+      tension: 0.4
+    },
+    {
+      label: 'Likely range',
+      data: dataPoints.map(point => point.high),
+      borderColor: 'transparent',
+      backgroundColor: 'rgba(224, 69, 123, 0.12)',
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      fill: '+1',
+      tension: 0.4
+    },
+    {
+      label: 'range-low',
+      data: dataPoints.map(point => point.low),
+      borderColor: 'transparent',
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      fill: false,
       tension: 0.4
     }
   ];
@@ -622,7 +753,8 @@ function updateChart(dataPoints, includeEPF) {
             },
             pointStyle: 'circle',
             boxWidth: 4,
-            boxHeight: 4
+            boxHeight: 4,
+            filter: item => item.text !== 'range-low'
           }
         },
         tooltip: {
@@ -644,6 +776,11 @@ function updateChart(dataPoints, includeEPF) {
           },
           callbacks: {
             label: function(context) {
+              if (context.dataset.label === 'range-low') return null;
+              if (context.dataset.label === 'Likely range') {
+                const point = dataPoints[context.dataIndex];
+                return `Likely range: RM ${Math.round(point.low).toLocaleString()} to RM ${Math.round(point.high).toLocaleString()}`;
+              }
               return context.dataset.label + ': RM ' + Math.round(context.parsed.y).toLocaleString();
             }
           }
