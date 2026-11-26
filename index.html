@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>💰 WealthGrow - Smart Investment Calculator</title>
+  <title>WealthGrow: investment and EPF calculator</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -13,8 +13,8 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <h1><span class="build-text">Build Your</span> <span class="gradient-text">Wealth</span></h1>
-      <p>Create realistic wealth projections using customizable investment portfolios and EPF tracking. Adjust return rates for different investment types to match your actual strategy and risk tolerance.</p>
+      <h1><span class="build-text">Build Your</span> <span class="accent-text">Wealth</span></h1>
+      <p>See what monthly investing and EPF could grow to, in ringgit.</p>
     </div>
   </section>
 
@@ -29,28 +29,28 @@
       </div>
       <div class="instruction-steps" id="instructionSteps">
         <div class="step-item">
-          <div class="step-icon">💰</div>
+          <div class="step-icon">1</div>
           <div class="step-content">
             <h4>Set Investment Amount</h4>
             <p>Enter monthly contributions and optional initial lump sum</p>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-icon">📊</div>
+          <div class="step-icon">2</div>
           <div class="step-content">
             <h4>Choose Investment Strategy</h4>
             <p>Use simple returns or customize portfolio mix with specific allocations</p>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-icon">🏦</div>
+          <div class="step-icon">3</div>
           <div class="step-content">
             <h4>Include EPF (Optional)</h4>
             <p>Add salary to track mandatory EPF alongside personal investments</p>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-icon">🎯</div>
+          <div class="step-icon">4</div>
           <div class="step-content">
             <h4>View Wealth Projection</h4>
             <p>See complete breakdown: investments, EPF, and realistic growth milestones</p>
@@ -67,15 +67,14 @@
         <!-- Left Panel - Inputs -->
         <div class="inputs-panel">
           <h2 class="panel-title">Investment Parameters</h2>
-          <p class="panel-subtitle">Adjust the values below to see how your investments will grow</p>
 
           <!-- Current Age -->
           <div class="input-group compact">
             <label class="input-label optional-label">Current Age</label>
             <div class="input-stepper">
-              <button class="stepper-btn" onclick="adjustValue('age', -1)">−</button>
-              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="25">
-              <button class="stepper-btn" onclick="adjustValue('age', 1)">+</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('age', -1)" aria-label="Decrease age">−</button>
+              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="">
+              <button type="button" class="stepper-btn" onclick="adjustValue('age', 1)" aria-label="Increase age">+</button>
             </div>
           </div>
 
@@ -83,9 +82,9 @@
           <div class="input-group">
             <label class="input-label">Monthly Investment (RM)</label>
             <div class="input-stepper">
-              <button class="stepper-btn" onclick="adjustValue('monthly', -100)">−</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('monthly', -100)" aria-label="Decrease monthly investment">−</button>
               <input type="text" class="stepper-input" id="monthlyInput" value="1,000" onchange="updateFromInput('monthly')" oninput="formatAndUpdate('monthly')" placeholder="0">
-              <button class="stepper-btn" onclick="adjustValue('monthly', 100)">+</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('monthly', 100)" aria-label="Increase monthly investment">+</button>
             </div>
           </div>
 
@@ -93,15 +92,25 @@
           <div class="input-group compact">
             <label class="input-label optional-label">Initial Investment (RM)</label>
             <div class="input-stepper">
-              <button class="stepper-btn" onclick="adjustValue('initial', -1000)">−</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('initial', -1000)" aria-label="Decrease initial investment">−</button>
               <input type="text" class="stepper-input" id="initialInput" value="0" onchange="updateFromInput('initial')" oninput="formatAndUpdate('initial')" placeholder="0">
-              <button class="stepper-btn" onclick="adjustValue('initial', 1000)">+</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('initial', 1000)" aria-label="Increase initial investment">+</button>
             </div>
           </div>
 
           <!-- Annual Return -->
           <div class="input-group">
             <label class="input-label">Expected Annual Return (%)</label>
+            <!-- Investment Mix Toggle -->
+            <div class="mix-toggle-container">
+              <label class="mix-toggle-label">
+                <input type="checkbox" id="mixToggle" onchange="toggleMix()">
+                <span class="mix-toggle-text">Use Investment Mix</span>
+                <span class="mix-toggle-subtitle">Set custom allocation across different investments</span>
+              </label>
+            </div>
+
+            <div id="returnGroup">
             <div class="slider-container">
               <div class="slider-wrapper">
                 <input type="range" class="slider" id="returnSlider" min="1" max="15" step="0.1" value="7" onchange="updateSlider()">
@@ -112,14 +121,6 @@
                 <span>Aggressive (12%)</span>
               </div>
             </div>
-            
-            <!-- Investment Mix Toggle -->
-            <div class="mix-toggle-container">
-              <label class="mix-toggle-label">
-                <input type="checkbox" id="mixToggle" onchange="toggleMix()">
-                <span class="mix-toggle-text">Use Investment Mix</span>
-                <span class="mix-toggle-subtitle">Set custom allocation across different investments</span>
-              </label>
             </div>
           </div>
 
@@ -132,6 +133,7 @@
                 <span class="blended-rate" id="blendedRate">7.0%</span>
               </div>
             </div>
+            <p class="mix-note">Shares always add up to 100%: moving one adjusts the others. The blended return replaces the single return rate.</p>
             
             <div class="mix-items">
               <!-- ETFs -->
@@ -145,11 +147,13 @@
                 </div>
                 <div class="mix-config" id="etfConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="etfReturnSlider" min="3" max="12" step="0.1" value="7.0" onchange="updateMixReturn('etf')">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="etfReturnSlider" aria-label="ETF return rate" min="3" max="12" step="0.1" value="7.0" onchange="updateMixReturn('etf')">
                     <span class="mix-return-rate" id="etfReturnRate">7.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="etfSlider" min="0" max="100" step="5" value="40" onchange="updateMix()">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="etfSlider" aria-label="ETF allocation percentage" min="0" max="100" step="5" value="40" onchange="updateMix('etf')">
                     <span class="mix-percentage" id="etfPercentage">40%</span>
                   </div>
                 </div>
@@ -166,11 +170,13 @@
                 </div>
                 <div class="mix-config" id="unitTrustConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="unitTrustReturnSlider" min="2" max="15" step="0.1" value="6.0" onchange="updateMixReturn('unitTrust')">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="unitTrustReturnSlider" aria-label="Unit trust return rate" min="2" max="15" step="0.1" value="6.0" onchange="updateMixReturn('unitTrust')">
                     <span class="mix-return-rate" id="unitTrustReturnRate">6.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="unitTrustSlider" min="0" max="100" step="5" value="30" onchange="updateMix()">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="unitTrustSlider" aria-label="Unit trust allocation percentage" min="0" max="100" step="5" value="30" onchange="updateMix('unitTrust')">
                     <span class="mix-percentage" id="unitTrustPercentage">30%</span>
                   </div>
                 </div>
@@ -187,11 +193,13 @@
                 </div>
                 <div class="mix-config" id="fdConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="fdReturnSlider" min="2" max="5" step="0.1" value="3.5" onchange="updateMixReturn('fd')">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="fdReturnSlider" aria-label="Fixed deposit return rate" min="2" max="5" step="0.1" value="3.5" onchange="updateMixReturn('fd')">
                     <span class="mix-return-rate" id="fdReturnRate">3.5%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="fdSlider" min="0" max="100" step="5" value="20" onchange="updateMix()">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="fdSlider" aria-label="Fixed deposit allocation percentage" min="0" max="100" step="5" value="20" onchange="updateMix('fd')">
                     <span class="mix-percentage" id="fdPercentage">20%</span>
                   </div>
                 </div>
@@ -208,21 +216,61 @@
                 </div>
                 <div class="mix-config" id="stocksConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="stocksReturnSlider" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('stocks')">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="stocksReturnSlider" aria-label="Stocks return rate" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('stocks')">
                     <span class="mix-return-rate" id="stocksReturnRate">10.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="stocksSlider" min="0" max="100" step="5" value="10" onchange="updateMix()">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="stocksSlider" aria-label="Stocks allocation percentage" min="0" max="100" step="5" value="10" onchange="updateMix('stocks')">
                     <span class="mix-percentage" id="stocksPercentage">10%</span>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div class="mix-total">
-              <span class="total-label">Total Allocation:</span>
-              <span class="total-percentage" id="totalPercentage">100%</span>
-              <span class="allocation-status" id="allocationStatus">✓ Balanced</span>
+              <!-- ASB -->
+              <div class="mix-item">
+                <div class="mix-checkbox">
+                  <input type="checkbox" id="asbEnabled" onchange="toggleInvestmentType('asb')">
+                  <label for="asbEnabled" class="investment-label">
+                    <span class="mix-name">ASB</span>
+                    <span class="mix-description">Amanah Saham Bumiputera, for Bumiputera investors. 2025 payout: 5.75%</span>
+                  </label>
+                </div>
+                <div class="mix-config disabled" id="asbConfig">
+                  <div class="mix-return-control">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="asbReturnSlider" aria-label="ASB return rate" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('asb')">
+                    <span class="mix-return-rate" id="asbReturnRate">5.75%</span>
+                  </div>
+                  <div class="mix-allocation">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="asbSlider" aria-label="ASB allocation percentage" min="0" max="100" step="5" value="0" onchange="updateMix('asb')">
+                    <span class="mix-percentage" id="asbPercentage">0%</span>
+                  </div>
+                </div>
+              </div>
+              <!-- REITs -->
+              <div class="mix-item">
+                <div class="mix-checkbox">
+                  <input type="checkbox" id="reitsEnabled" onchange="toggleInvestmentType('reits')">
+                  <label for="reitsEnabled" class="investment-label">
+                    <span class="mix-name">REITs</span>
+                    <span class="mix-description">Bursa-listed property trusts. Recent index dividend yield: about 5.5%</span>
+                  </label>
+                </div>
+                <div class="mix-config disabled" id="reitsConfig">
+                  <div class="mix-return-control">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="reitsReturnSlider" aria-label="REITs return rate" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('reits')">
+                    <span class="mix-return-rate" id="reitsReturnRate">5.5%</span>
+                  </div>
+                  <div class="mix-allocation">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="reitsSlider" aria-label="REITs allocation percentage" min="0" max="100" step="5" value="0" onchange="updateMix('reits')">
+                    <span class="mix-percentage" id="reitsPercentage">0%</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -258,9 +306,9 @@
             <div class="input-group compact">
               <label class="input-label">Monthly Salary (RM)</label>
               <div class="input-stepper">
-                <button class="stepper-btn" onclick="adjustValue('salary', -500)">−</button>
+                <button type="button" class="stepper-btn" onclick="adjustValue('salary', -500)" aria-label="Decrease monthly salary">−</button>
                 <input type="text" class="stepper-input" id="salaryInput" value="5,000" onchange="updateFromInput('salary')" oninput="formatAndUpdate('salary')" placeholder="0">
-                <button class="stepper-btn" onclick="adjustValue('salary', 500)">+</button>
+                <button type="button" class="stepper-btn" onclick="adjustValue('salary', 500)" aria-label="Increase monthly salary">+</button>
               </div>
             </div>
 
@@ -268,9 +316,9 @@
             <div class="input-group compact">
               <label class="input-label optional-label">Current EPF Balance (RM)</label>
               <div class="input-stepper">
-                <button class="stepper-btn" onclick="adjustValue('epfBalance', -5000)">−</button>
+                <button type="button" class="stepper-btn" onclick="adjustValue('epfBalance', -5000)" aria-label="Decrease EPF balance">−</button>
                 <input type="text" class="stepper-input" id="epfBalanceInput" value="50,000" onchange="updateFromInput('epfBalance')" oninput="formatAndUpdate('epfBalance')" placeholder="0">
-                <button class="stepper-btn" onclick="adjustValue('epfBalance', 5000)">+</button>
+                <button type="button" class="stepper-btn" onclick="adjustValue('epfBalance', 5000)" aria-label="Increase EPF balance">+</button>
               </div>
             </div>
 
@@ -302,7 +350,7 @@
         <div class="results-panel">
           <div id="loadingState" class="loading" style="display: none;">
             <div class="spinner"></div>
-            <p>Calculating your financial future...</p>
+            <p>Calculating...</p>
           </div>
 
           <div id="resultsContent">
@@ -317,31 +365,21 @@
               </div>
               <div id="loadingStateChart" class="loading" style="display: none;">
                 <div class="spinner"></div>
-                <p>Calculating your financial future...</p>
+                <p>Calculating...</p>
               </div>
               <canvas id="wealthChart" style="display: none;"></canvas>
             </div>
 
-            <!-- Equation Layout -->
-            <div class="wealth-equation fade-in">
-              <div class="equation-box invested">
-                <div class="equation-amount" id="eqTotalContributed">RM 0</div>
-                <div class="equation-label">Total Invested</div>
-              </div>
-              
-              <div class="equation-operator">+</div>
-              
-              <div class="equation-box interest">
-                <div class="equation-amount" id="eqTotalInterest">RM 0</div>
-                <div class="equation-label">Interest Earned</div>
-              </div>
-              
-              <div class="equation-operator equals">=</div>
-              
-              <div class="equation-box final">
-                <div class="equation-amount" id="eqFinalAmount">RM 0</div>
-                <div class="equation-label">Final Wealth</div>
-              </div>
+            <!-- Wealth Summary -->
+            <div class="wealth-summary" role="region" aria-label="Wealth summary">
+              <div class="summary-label" id="summaryLabel">Final wealth</div>
+              <div class="summary-total" id="eqFinalAmount">RM 0</div>
+              <div class="summary-bar" id="summaryBar" role="img" aria-label="Split of final wealth"></div>
+              <ul class="summary-parts">
+                <li class="part-invest"><span class="swatch"></span><span class="part-name">Your investments</span><span class="part-amount" id="partInvest">RM 0</span></li>
+                <li class="part-epf" id="partEpfRow"><span class="swatch"></span><span class="part-name">EPF</span><span class="part-amount" id="partEpf">RM 0</span><span class="part-note" id="partEpfNote"></span></li>
+                <li class="part-growth"><span class="swatch"></span><span class="part-name">Growth</span><span class="part-amount" id="eqTotalInterest">RM 0</span></li>
+              </ul>
             </div>
 
             <!-- Progress Milestones -->

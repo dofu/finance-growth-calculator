@@ -1,4 +1,4 @@
-// Unit tests for assets/js/calculator.js. Run with: node --test tests/
+// Unit tests for assets/js/calculator.js. Run with: node --test tests/*.test.mjs
 // The script is loaded into a sandbox with a minimal fake DOM, so no browser
 // or npm packages are needed.
 import { test } from 'node:test';
@@ -50,7 +50,7 @@ function load({ missing = [] } = {}) {
   vm.createContext(context);
   vm.runInContext(SOURCE + `
     ;globalThis.__api = { get values() { return values; }, adjustValue, formatAndUpdate,
-      updateFromInput, calculateEPF, calculateBlendedReturn, calculate };`, context);
+      updateFromInput, calculateEPF, calculateBlendedReturn, calculate, updateMix, toggleInvestmentType };`, context);
   return { api: context.__api, el: get, charts };
 }
 
@@ -113,12 +113,53 @@ test('blended return weights each enabled asset by its allocation', () => {
   assert.ok(Math.abs(api.values.returnRate - 6.3) < 1e-9);
 });
 
-test('blended return skips disabled assets and leaves unallocated money at 0%', () => {
-  const { api } = load();
+const shares = api => Object.values(api.values.mixAllocations).reduce((a, b) => a + b, 0);
+
+test('moving one share adjusts the others so the mix stays at 100%', () => {
+  const { api, el } = load();
   api.values.useMix = true;
-  api.values.mixEnabled.stocks = false;
-  api.calculateBlendedReturn();
-  assert.ok(Math.abs(api.values.returnRate - 5.3) < 1e-9);
+  el('etfSlider').value = '70';
+  api.updateMix('etf');
+  assert.equal(api.values.mixAllocations.etf, 70);
+  assert.equal(shares(api), 100);
+  // the others keep their order (30 : 20 : 10)
+  const { unitTrust, fd, stocks } = api.values.mixAllocations;
+  assert.ok(unitTrust >= fd && fd >= stocks, `${unitTrust} ${fd} ${stocks}`);
+});
+
+test('one investment at 100% leaves no share for the rest and no inflated return', () => {
+  const { api, el } = load();
+  api.values.useMix = true;
+  el('etfSlider').value = '100';
+  api.updateMix('etf');
+  assert.equal(shares(api), 100);
+  assert.equal(api.values.returnRate, 7);
+});
+
+test('unticking an investment hands its share to the others', () => {
+  const { api, el } = load();
+  api.values.useMix = true;
+  el('stocksEnabled').checked = false;
+  api.toggleInvestmentType('stocks');
+  assert.equal(api.values.mixAllocations.stocks, 0);
+  assert.equal(shares(api), 100);
+});
+
+test('the last ticked investment cannot be unticked', () => {
+  const { api, el } = load();
+  for (const k of ['unitTrust', 'fd', 'stocks']) { el(k + 'Enabled').checked = false; api.toggleInvestmentType(k); }
+  el('etfEnabled').checked = false;
+  api.toggleInvestmentType('etf');
+  assert.equal(api.values.mixEnabled.etf, true);
+  assert.equal(api.values.mixAllocations.etf, 100);
+});
+
+test('ASB and REITs start unticked with sourced default rates', () => {
+  const { api } = load();
+  assert.equal(api.values.mixEnabled.asb, false);
+  assert.equal(api.values.mixEnabled.reits, false);
+  assert.equal(api.values.mixReturns.asb, 5.75);
+  assert.equal(api.values.mixReturns.reits, 5.5);
 });
 
 test('blended return is 0 when nothing is allocated', () => {
@@ -179,7 +220,7 @@ test('clearing the age field makes age empty again', () => {
   assert.equal(api.values.age, null);
 });
 
-test('a salary can be typed one digit at a time', { todo: 'the RM 1,000 minimum is applied on every keystroke, so typing "6" shows 1,000' }, () => {
+test('a salary can be typed one digit at a time', () => {
   const { api, el } = load();
   const input = el('salaryInput');
   input.value = '';
@@ -188,6 +229,16 @@ test('a salary can be typed one digit at a time', { todo: 'the RM 1,000 minimum 
     api.formatAndUpdate('salary');
   }
   assert.equal(api.values.salary, 6500);
+  assert.equal(input.value, (6500).toLocaleString());
+});
+
+test('a salary below RM 1,000 is raised to the minimum when the field is left', () => {
+  const { api, el } = load();
+  el('salaryInput').value = '800';
+  api.formatAndUpdate('salary');
+  assert.equal(api.values.salary, 5000); // unchanged while typing
+  api.updateFromInput('salary');
+  assert.equal(api.values.salary, 1000);
 });
 
 // Full calculation and what the page shows
@@ -198,7 +249,8 @@ test('final wealth equals investments plus EPF (default inputs)', () => {
   const invest = futureValue(0, 1000, 7, 20);
   const epf = futureValue(50000, 1200, 5.5, 20);
   assert.equal(el('eqFinalAmount').textContent, rm(invest + epf));
-  assert.equal(el('eqTotalContributed').textContent, rm(1000 * 240 + 50000 + 1200 * 240));
+  assert.equal(el('partInvest').textContent, rm(1000 * 240));
+  assert.equal(el('partEpf').textContent, rm(50000 + 1200 * 240));
   assert.equal(el('eqFinalAmount').textContent, 'RM 1,193,511');
 });
 
@@ -207,15 +259,16 @@ test('without EPF only the investment is counted', () => {
   api.values.includeEPF = false;
   api.calculate();
   assert.equal(el('eqFinalAmount').textContent, rm(futureValue(0, 1000, 7, 20)));
-  assert.equal(el('eqTotalContributed').textContent, rm(240000));
+  assert.equal(el('partInvest').textContent, rm(240000));
+  assert.equal(el('partEpfRow').hidden, true);
 });
 
-test('total invested plus interest equals final wealth', () => {
+test('investments, EPF and growth add up to final wealth', () => {
   const { api, el } = load();
   Object.assign(api.values, { monthly: 750, initial: 20000, returnRate: 8.2, years: 33, salary: 7200, voluntaryEPF: 150 });
   api.calculate();
   const num = s => Number(s.replace(/[^\d-]/g, ''));
-  const diff = num(el('eqTotalContributed').textContent) + num(el('eqTotalInterest').textContent) - num(el('eqFinalAmount').textContent);
+  const diff = num(el('partInvest').textContent) + num(el('partEpf').textContent) + num(el('eqTotalInterest').textContent) - num(el('eqFinalAmount').textContent);
   assert.ok(Math.abs(diff) <= 1, `rounding gap ${diff}`);
 });
 
@@ -259,14 +312,32 @@ test('the calculation works on V1, which has no voluntary EPF field or breakdown
   assert.equal(el('eqFinalAmount').textContent, rm(futureValue(0, 1100, 7, 20) + futureValue(50000, 1200, 5.5, 20)));
 });
 
-test('mix breakdown amounts add up to the milestone total', { todo: 'each asset is shown as its starting share of the total, not grown at its own rate' }, () => {
+test('mix breakdown amounts add up to the milestone total', () => {
   const { api, el } = load();
   Object.assign(api.values, { useMix: true, includeEPF: false });
-  api.values.mixAllocations.fd = 0; // 90% allocated
-  api.calculateBlendedReturn();
+  el('fdSlider').value = '35';
+  api.updateMix('fd');
   api.calculate();
   const item = el('progressContainer').children.at(-1).innerHTML;
   const total = Number(item.match(/progress-amount">RM ([\d,]+)/)[1].replace(/,/g, ''));
   const parts = [...item.matchAll(/breakdown-amount">RM ([\d,]+)/g)].map(m => Number(m[1].replace(/,/g, '')));
   assert.ok(Math.abs(parts.reduce((a, b) => a + b, 0) - total) <= parts.length);
+});
+
+test('the summary names the period and splits EPF into contributions and today\'s balance', () => {
+  const { api, el } = load();
+  api.values.age = 30;
+  api.calculate();
+  assert.equal(el('summaryLabel').textContent, 'Final wealth after 20 years (age 50)');
+  assert.equal(el('partEpfNote').textContent, 'RM 288,000 contributions, RM 50,000 you have now');
+  assert.equal((el('summaryBar').innerHTML.match(/<span/g) || []).length, 3);
+});
+
+test('milestone captions state what was put in and what it grew by', () => {
+  const { api, el } = load();
+  api.values.includeEPF = false;
+  api.calculate();
+  const last = el('progressContainer').children.at(-1).innerHTML;
+  const growth = futureValue(0, 1000, 7, 20) - 240000;
+  assert.match(last.replace(/<[^>]+>/g, ''), new RegExp(`RM 240,000 put in, ${rm(growth)} growth`));
 });
