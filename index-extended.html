@@ -69,9 +69,9 @@
           <div class="input-group compact">
             <label for="ageInput" class="input-label optional-label">Current Age</label>
             <div class="input-stepper">
-              <button class="stepper-btn" onclick="adjustValue('age', -1)" aria-label="Decrease age">−</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('age', -1)" aria-label="Decrease age">−</button>
               <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="" aria-describedby="age-help">
-              <button class="stepper-btn" onclick="adjustValue('age', 1)" aria-label="Increase age">+</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('age', 1)" aria-label="Increase age">+</button>
             </div>
             <div id="age-help" class="sr-only">Optional field to show age progression in results</div>
           </div>
@@ -80,9 +80,9 @@
           <div class="input-group">
             <label for="monthlyInput" class="input-label">Monthly Investment (RM)</label>
             <div class="input-stepper">
-              <button class="stepper-btn" onclick="adjustValue('monthly', -100)" aria-label="Decrease monthly investment">−</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('monthly', -100)" aria-label="Decrease monthly investment">−</button>
               <input type="text" class="stepper-input" id="monthlyInput" value="1,000" onchange="updateFromInput('monthly')" oninput="formatAndUpdate('monthly')" placeholder="0" aria-required="true">
-              <button class="stepper-btn" onclick="adjustValue('monthly', 100)" aria-label="Increase monthly investment">+</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('monthly', 100)" aria-label="Increase monthly investment">+</button>
             </div>
           </div>
 
@@ -90,15 +90,25 @@
           <div class="input-group compact">
             <label for="initialInput" class="input-label optional-label">Initial Investment (RM)</label>
             <div class="input-stepper">
-              <button class="stepper-btn" onclick="adjustValue('initial', -1000)" aria-label="Decrease initial investment">−</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('initial', -1000)" aria-label="Decrease initial investment">−</button>
               <input type="text" class="stepper-input" id="initialInput" value="0" onchange="updateFromInput('initial')" oninput="formatAndUpdate('initial')" placeholder="0">
-              <button class="stepper-btn" onclick="adjustValue('initial', 1000)" aria-label="Increase initial investment">+</button>
+              <button type="button" class="stepper-btn" onclick="adjustValue('initial', 1000)" aria-label="Increase initial investment">+</button>
             </div>
           </div>
 
           <!-- Annual Return -->
-          <div class="input-group" id="returnGroup">
+          <div class="input-group">
             <label for="returnSlider" class="input-label">Expected Annual Return (%)</label>
+            <!-- Investment Mix Toggle -->
+            <div class="mix-toggle-container">
+              <label class="mix-toggle-label">
+                <input type="checkbox" id="mixToggle" onchange="toggleMix()">
+                <span class="mix-toggle-text">Use Investment Mix</span>
+                <span class="mix-toggle-subtitle">Set custom allocation across different investments</span>
+              </label>
+            </div>
+
+            <div id="returnGroup">
             <div class="slider-container">
               <div class="slider-wrapper">
                 <input type="range" class="slider" id="returnSlider" min="1" max="15" step="0.1" value="7" onchange="updateSlider()" aria-describedby="returnValue">
@@ -109,14 +119,6 @@
                 <span>Aggressive (12%)</span>
               </div>
             </div>
-            
-            <!-- Investment Mix Toggle -->
-            <div class="mix-toggle-container">
-              <label class="mix-toggle-label">
-                <input type="checkbox" id="mixToggle" onchange="toggleMix()">
-                <span class="mix-toggle-text">Use Investment Mix</span>
-                <span class="mix-toggle-subtitle">Set custom allocation across different investments</span>
-              </label>
             </div>
           </div>
 
@@ -302,9 +304,9 @@
             <div class="input-group compact">
               <label for="salaryInput" class="input-label">Monthly Salary (RM)</label>
               <div class="input-stepper">
-                <button class="stepper-btn" onclick="adjustValue('salary', -500)" aria-label="Decrease salary">−</button>
+                <button type="button" class="stepper-btn" onclick="adjustValue('salary', -500)" aria-label="Decrease monthly salary">−</button>
                 <input type="text" class="stepper-input" id="salaryInput" value="5,000" onchange="updateFromInput('salary')" oninput="formatAndUpdate('salary')" placeholder="0">
-                <button class="stepper-btn" onclick="adjustValue('salary', 500)" aria-label="Increase salary">+</button>
+                <button type="button" class="stepper-btn" onclick="adjustValue('salary', 500)" aria-label="Increase monthly salary">+</button>
               </div>
               <div class="epf-rate-info" id="epfRateInfo" style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--gray-400); line-height: 1.3;">
                 Employment EPF: 23% (RM 1,150)<br>
@@ -316,9 +318,9 @@
             <div class="input-group compact">
               <label for="voluntaryEPFInput" class="input-label optional-label">Additional Voluntary EPF (RM)</label>
               <div class="input-stepper">
-                <button class="stepper-btn" onclick="adjustValue('voluntaryEPF', -100)" aria-label="Decrease voluntary EPF">−</button>
+                <button type="button" class="stepper-btn" onclick="adjustValue('voluntaryEPF', -100)" aria-label="Decrease voluntary EPF">−</button>
                 <input type="text" class="stepper-input" id="voluntaryEPFInput" value="0" onchange="updateFromInput('voluntaryEPF')" oninput="formatAndUpdate('voluntaryEPF')" placeholder="0">
-                <button class="stepper-btn" onclick="adjustValue('voluntaryEPF', 100)" aria-label="Increase voluntary EPF">+</button>
+                <button type="button" class="stepper-btn" onclick="adjustValue('voluntaryEPF', 100)" aria-label="Increase voluntary EPF">+</button>
               </div>
               <div style="margin-top: 0.3rem; font-size: 0.7rem; color: var(--gray-400);">
                 Personal contributions beyond employment EPF
@@ -329,9 +331,9 @@
             <div class="input-group compact">
               <label for="epfBalanceInput" class="input-label optional-label">Current EPF Balance (RM)</label>
               <div class="input-stepper">
-                <button class="stepper-btn" onclick="adjustValue('epfBalance', -5000)" aria-label="Decrease EPF balance">−</button>
+                <button type="button" class="stepper-btn" onclick="adjustValue('epfBalance', -5000)" aria-label="Decrease EPF balance">−</button>
                 <input type="text" class="stepper-input" id="epfBalanceInput" value="50,000" onchange="updateFromInput('epfBalance')" oninput="formatAndUpdate('epfBalance')" placeholder="0">
-                <button class="stepper-btn" onclick="adjustValue('epfBalance', 5000)" aria-label="Increase EPF balance">+</button>
+                <button type="button" class="stepper-btn" onclick="adjustValue('epfBalance', 5000)" aria-label="Increase EPF balance">+</button>
               </div>
             </div>
 
