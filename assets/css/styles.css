@@ -1647,6 +1647,7 @@ body {
 }
 
 .summary-total,
+.part-amount,
 .progress-amount {
   width: fit-content;
   border-radius: 0.375rem;
@@ -1654,9 +1655,15 @@ body {
 
 .is-updating .summary-total,
 .is-updating .summary-range,
-.is-updating .summary-parts,
+.is-updating .summary-parts .part-amount,
+.is-updating .summary-parts .part-note,
 .is-updating #progressContainer {
-  opacity: 0.35;
+  animation: update-breathe 0.8s ease-in-out infinite;
+}
+
+@keyframes update-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
 .update-bar {
@@ -1701,7 +1708,20 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .is-updating .update-bar::before,
+  .is-updating .summary-total,
+  .is-updating .summary-range,
+  .is-updating .summary-parts .part-amount,
+  .is-updating .summary-parts .part-note,
+  .is-updating #progressContainer,
   .just-updated {
     animation: none;
+  }
+
+  .is-updating .summary-total,
+  .is-updating .summary-range,
+  .is-updating .summary-parts .part-amount,
+  .is-updating .summary-parts .part-note,
+  .is-updating #progressContainer {
+    opacity: 0.35;
   }
 }

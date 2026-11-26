@@ -614,7 +614,7 @@ function calculate() {
     if (resultsContent) {
       resultsContent.classList.add('fade-in');
       resultsContent.classList.remove('is-updating');
-      flashUpdated(resultsContent.querySelectorAll('.summary-total, .progress-amount'));
+      flashUpdated(resultsContent.querySelectorAll('.summary-total, .part-amount, .progress-amount'));
     }
   }, 500);
 }
