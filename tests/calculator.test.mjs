@@ -27,7 +27,7 @@ function fakeElement(id) {
 }
 
 // Loads a fresh copy of the script. `missing` lists element ids that do not
-// exist on the page (V1 has no voluntary EPF field or calculation breakdown).
+// exist on the page.
 function load({ missing = [] } = {}) {
   const els = new Map();
   const get = id => {
@@ -308,7 +308,7 @@ test('a period shorter than five years still gets a milestone', () => {
   assert.equal(el('progressContainer').children.length, 1);
 });
 
-test('the calculation works on V1, which has no voluntary EPF field or breakdown', () => {
+test('the calculation still works when the voluntary EPF field and breakdown are absent', () => {
   const missing = ['voluntaryEPFInput', 'epfRateInfo', 'calculationBreakdown', 'breakdownDetails',
     'breakdownMonthly', 'breakdownInitial', 'breakdownYears', 'breakdownReturn', 'epfBreakdownSection'];
   const { api, el } = load({ missing });

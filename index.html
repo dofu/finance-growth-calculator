@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
   <title>WealthGrow: investment and EPF calculator</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -10,51 +11,47 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
-  <!-- Hero Section -->
-  <section class="hero">
+  <!-- Header Section with proper semantic HTML -->
+  <header class="hero" role="banner">
     <div class="hero-content">
       <h1><span class="build-text">Build Your</span> <span class="accent-text">Wealth</span></h1>
       <p class="hero-stat"><strong>78.5%</strong> of EPF members aged 56 to 60 have less than RM390,000, the basic savings EPF sets for retirement (<a href="https://www.thestar.com.my/news/nation/2026/03/15/easing-the-road-to-retirement-with-epf" target="_blank" rel="noopener">EPF data, March 2026</a>).</p>
       <p>See what monthly investing on top of EPF could grow to, in ringgit.</p>
     </div>
-  </section>
+  </header>
 
   <!-- Instructions Section -->
-  <section class="instructions-banner">
+  <section class="instructions-banner" aria-label="How to use calculator">
     <div class="instructions-content">
-      <div class="instructions-header" onclick="toggleInstructions()">
+      <div class="instructions-header" onclick="toggleInstructions()" role="button" tabindex="0" aria-expanded="false" aria-controls="instructionSteps">
         <h3>How It Works</h3>
-        <button class="toggle-btn" id="toggleBtn">
+        <button class="toggle-btn" id="toggleBtn" aria-label="Toggle instructions">
           <span class="toggle-icon">−</span>
         </button>
       </div>
       <div class="instruction-steps" id="instructionSteps">
         <div class="step-item">
-          <div class="step-icon">1</div>
           <div class="step-content">
-            <h4>Set Investment Amount</h4>
-            <p>Enter monthly contributions and optional initial lump sum</p>
+            <h4>Set Investment Parameters</h4>
+            <p>Enter your monthly investment amount, optional initial lump sum, and current age to see age progression</p>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-icon">2</div>
           <div class="step-content">
             <h4>Choose Investment Strategy</h4>
-            <p>Use simple returns or customize portfolio mix with specific allocations</p>
+            <p>Use simple annual return rate, or enable "Investment Mix" to customize portfolio allocation across ETFs, unit trusts, fixed deposits, and stocks with individual return rates</p>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-icon">3</div>
           <div class="step-content">
-            <h4>Include EPF (Optional)</h4>
-            <p>Add salary to track mandatory EPF alongside personal investments</p>
+            <h4>Include EPF Tracking</h4>
+            <p>Add your monthly salary to automatically calculate EPF contributions (23-24% based on salary). Include current EPF balance and set expected dividend rate</p>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-icon">4</div>
           <div class="step-content">
-            <h4>View Wealth Projection</h4>
-            <p>See complete breakdown: investments, EPF, and realistic growth milestones</p>
+            <h4>View Complete Projection</h4>
+            <p>See interactive chart, a breakdown of your final wealth, and milestone achievements showing your total financial growth over time</p>
           </div>
         </div>
       </div>
@@ -62,36 +59,37 @@
   </section>
 
   <!-- Main Calculator -->
-  <section class="calculator-section">
+  <main class="calculator-section" role="main">
     <div class="calculator-card">
       <div class="calculator-grid">
         <!-- Left Panel - Inputs -->
-        <div class="inputs-panel">
+        <section class="inputs-panel" aria-label="Investment parameters">
           <h2 class="panel-title">Investment Parameters</h2>
 
           <!-- Current Age -->
           <div class="input-group compact">
-            <label class="input-label optional-label">Current Age</label>
+            <label for="ageInput" class="input-label optional-label">Current Age</label>
             <div class="input-stepper">
               <button type="button" class="stepper-btn" onclick="adjustValue('age', -1)" aria-label="Decrease age">−</button>
-              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="">
+              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="" aria-describedby="age-help">
               <button type="button" class="stepper-btn" onclick="adjustValue('age', 1)" aria-label="Increase age">+</button>
             </div>
+            <div id="age-help" class="sr-only">Optional field to show age progression in results</div>
           </div>
 
           <!-- Monthly Investment -->
           <div class="input-group">
-            <label class="input-label">Monthly Investment (RM)</label>
+            <label for="monthlyInput" class="input-label">Monthly Investment (RM)</label>
             <div class="input-stepper">
               <button type="button" class="stepper-btn" onclick="adjustValue('monthly', -100)" aria-label="Decrease monthly investment">−</button>
-              <input type="text" class="stepper-input" id="monthlyInput" value="1,000" onchange="updateFromInput('monthly')" oninput="formatAndUpdate('monthly')" placeholder="0">
+              <input type="text" class="stepper-input" id="monthlyInput" value="1,000" onchange="updateFromInput('monthly')" oninput="formatAndUpdate('monthly')" placeholder="0" aria-required="true">
               <button type="button" class="stepper-btn" onclick="adjustValue('monthly', 100)" aria-label="Increase monthly investment">+</button>
             </div>
           </div>
 
           <!-- Initial Investment -->
           <div class="input-group compact">
-            <label class="input-label optional-label">Initial Investment (RM)</label>
+            <label for="initialInput" class="input-label optional-label">Initial Investment (RM)</label>
             <div class="input-stepper">
               <button type="button" class="stepper-btn" onclick="adjustValue('initial', -1000)" aria-label="Decrease initial investment">−</button>
               <input type="text" class="stepper-input" id="initialInput" value="0" onchange="updateFromInput('initial')" oninput="formatAndUpdate('initial')" placeholder="0">
@@ -101,7 +99,7 @@
 
           <!-- Annual Return -->
           <div class="input-group">
-            <label class="input-label">Expected Annual Return (%)</label>
+            <label for="returnSlider" class="input-label">Expected Annual Return (%)</label>
             <!-- Investment Mix Toggle -->
             <div class="mix-toggle-container">
               <label class="mix-toggle-label">
@@ -114,10 +112,10 @@
             <div id="returnGroup">
             <div class="slider-container">
               <div class="slider-wrapper">
-                <input type="range" class="slider" id="returnSlider" min="1" max="15" step="0.1" value="7" onchange="updateSlider()">
-                <div class="slider-value" id="returnValue">7.0%</div>
+                <input type="range" class="slider" id="returnSlider" min="1" max="15" step="0.1" value="7" onchange="updateSlider()" aria-describedby="returnValue">
+                <div class="slider-value" id="returnValue" aria-live="polite">7.0%</div>
               </div>
-              <div class="slider-labels">
+              <div class="slider-labels" aria-hidden="true">
                 <span>Conservative (3%)</span>
                 <span>Aggressive (12%)</span>
               </div>
@@ -131,7 +129,7 @@
               <h4>Portfolio Allocation</h4>
               <div class="blended-return">
                 <span class="blended-label">Blended Return:</span>
-                <span class="blended-rate" id="blendedRate">7.0%</span>
+                <span class="blended-rate" id="blendedRate" aria-live="polite">7.0%</span>
               </div>
             </div>
             <p class="mix-note">Shares always add up to 100%: moving one adjusts the others. The blended return replaces the single return rate.</p>
@@ -149,13 +147,13 @@
                 <div class="mix-config" id="etfConfig">
                   <div class="mix-return-control">
                     <span class="mix-control-label" aria-hidden="true">Return</span>
-                    <input type="range" class="return-slider" id="etfReturnSlider" aria-label="ETF return rate" min="3" max="12" step="0.1" value="7.0" onchange="updateMixReturn('etf')">
-                    <span class="mix-return-rate" id="etfReturnRate">7.0%</span>
+                    <input type="range" class="return-slider" id="etfReturnSlider" min="3" max="12" step="0.1" value="7.0" onchange="updateMixReturn('etf')" aria-label="ETF return rate">
+                    <span class="mix-return-rate" id="etfReturnRate" aria-live="polite">7.0%</span>
                   </div>
                   <div class="mix-allocation">
                     <span class="mix-control-label" aria-hidden="true">Share</span>
-                    <input type="range" class="mix-slider" id="etfSlider" aria-label="ETF allocation percentage" min="0" max="100" step="5" value="40" onchange="updateMix('etf')">
-                    <span class="mix-percentage" id="etfPercentage">40%</span>
+                    <input type="range" class="mix-slider" id="etfSlider" min="0" max="100" step="5" value="40" onchange="updateMix('etf')" aria-label="ETF allocation percentage">
+                    <span class="mix-percentage" id="etfPercentage" aria-live="polite">40%</span>
                   </div>
                 </div>
               </div>
@@ -172,13 +170,13 @@
                 <div class="mix-config" id="unitTrustConfig">
                   <div class="mix-return-control">
                     <span class="mix-control-label" aria-hidden="true">Return</span>
-                    <input type="range" class="return-slider" id="unitTrustReturnSlider" aria-label="Unit trust return rate" min="2" max="15" step="0.1" value="6.0" onchange="updateMixReturn('unitTrust')">
-                    <span class="mix-return-rate" id="unitTrustReturnRate">6.0%</span>
+                    <input type="range" class="return-slider" id="unitTrustReturnSlider" min="2" max="15" step="0.1" value="6.0" onchange="updateMixReturn('unitTrust')" aria-label="Unit trust return rate">
+                    <span class="mix-return-rate" id="unitTrustReturnRate" aria-live="polite">6.0%</span>
                   </div>
                   <div class="mix-allocation">
                     <span class="mix-control-label" aria-hidden="true">Share</span>
-                    <input type="range" class="mix-slider" id="unitTrustSlider" aria-label="Unit trust allocation percentage" min="0" max="100" step="5" value="30" onchange="updateMix('unitTrust')">
-                    <span class="mix-percentage" id="unitTrustPercentage">30%</span>
+                    <input type="range" class="mix-slider" id="unitTrustSlider" min="0" max="100" step="5" value="30" onchange="updateMix('unitTrust')" aria-label="Unit trust allocation percentage">
+                    <span class="mix-percentage" id="unitTrustPercentage" aria-live="polite">30%</span>
                   </div>
                 </div>
               </div>
@@ -195,13 +193,13 @@
                 <div class="mix-config" id="fdConfig">
                   <div class="mix-return-control">
                     <span class="mix-control-label" aria-hidden="true">Return</span>
-                    <input type="range" class="return-slider" id="fdReturnSlider" aria-label="Fixed deposit return rate" min="2" max="5" step="0.1" value="3.5" onchange="updateMixReturn('fd')">
-                    <span class="mix-return-rate" id="fdReturnRate">3.5%</span>
+                    <input type="range" class="return-slider" id="fdReturnSlider" min="2" max="5" step="0.1" value="3.5" onchange="updateMixReturn('fd')" aria-label="Fixed deposit return rate">
+                    <span class="mix-return-rate" id="fdReturnRate" aria-live="polite">3.5%</span>
                   </div>
                   <div class="mix-allocation">
                     <span class="mix-control-label" aria-hidden="true">Share</span>
-                    <input type="range" class="mix-slider" id="fdSlider" aria-label="Fixed deposit allocation percentage" min="0" max="100" step="5" value="20" onchange="updateMix('fd')">
-                    <span class="mix-percentage" id="fdPercentage">20%</span>
+                    <input type="range" class="mix-slider" id="fdSlider" min="0" max="100" step="5" value="20" onchange="updateMix('fd')" aria-label="Fixed deposit allocation percentage">
+                    <span class="mix-percentage" id="fdPercentage" aria-live="polite">20%</span>
                   </div>
                 </div>
               </div>
@@ -218,13 +216,13 @@
                 <div class="mix-config" id="stocksConfig">
                   <div class="mix-return-control">
                     <span class="mix-control-label" aria-hidden="true">Return</span>
-                    <input type="range" class="return-slider" id="stocksReturnSlider" aria-label="Stocks return rate" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('stocks')">
-                    <span class="mix-return-rate" id="stocksReturnRate">10.0%</span>
+                    <input type="range" class="return-slider" id="stocksReturnSlider" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('stocks')" aria-label="Stocks return rate">
+                    <span class="mix-return-rate" id="stocksReturnRate" aria-live="polite">10.0%</span>
                   </div>
                   <div class="mix-allocation">
                     <span class="mix-control-label" aria-hidden="true">Share</span>
-                    <input type="range" class="mix-slider" id="stocksSlider" aria-label="Stocks allocation percentage" min="0" max="100" step="5" value="10" onchange="updateMix('stocks')">
-                    <span class="mix-percentage" id="stocksPercentage">10%</span>
+                    <input type="range" class="mix-slider" id="stocksSlider" min="0" max="100" step="5" value="10" onchange="updateMix('stocks')" aria-label="Stocks allocation percentage">
+                    <span class="mix-percentage" id="stocksPercentage" aria-live="polite">10%</span>
                   </div>
                 </div>
               </div>
@@ -240,13 +238,13 @@
                 <div class="mix-config disabled" id="asbConfig">
                   <div class="mix-return-control">
                     <span class="mix-control-label" aria-hidden="true">Return</span>
-                    <input type="range" class="return-slider" id="asbReturnSlider" aria-label="ASB return rate" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('asb')">
-                    <span class="mix-return-rate" id="asbReturnRate">5.75%</span>
+                    <input type="range" class="return-slider" id="asbReturnSlider" min="3" max="8" step="0.05" value="5.75" onchange="updateMixReturn('asb')" aria-label="ASB return rate">
+                    <span class="mix-return-rate" id="asbReturnRate" aria-live="polite">5.75%</span>
                   </div>
                   <div class="mix-allocation">
                     <span class="mix-control-label" aria-hidden="true">Share</span>
-                    <input type="range" class="mix-slider" id="asbSlider" aria-label="ASB allocation percentage" min="0" max="100" step="5" value="0" onchange="updateMix('asb')">
-                    <span class="mix-percentage" id="asbPercentage">0%</span>
+                    <input type="range" class="mix-slider" id="asbSlider" min="0" max="100" step="5" value="0" onchange="updateMix('asb')" aria-label="ASB allocation percentage">
+                    <span class="mix-percentage" id="asbPercentage" aria-live="polite">0%</span>
                   </div>
                 </div>
               </div>
@@ -262,13 +260,13 @@
                 <div class="mix-config disabled" id="reitsConfig">
                   <div class="mix-return-control">
                     <span class="mix-control-label" aria-hidden="true">Return</span>
-                    <input type="range" class="return-slider" id="reitsReturnSlider" aria-label="REITs return rate" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('reits')">
-                    <span class="mix-return-rate" id="reitsReturnRate">5.5%</span>
+                    <input type="range" class="return-slider" id="reitsReturnSlider" min="2" max="10" step="0.05" value="5.5" onchange="updateMixReturn('reits')" aria-label="REITs return rate">
+                    <span class="mix-return-rate" id="reitsReturnRate" aria-live="polite">5.5%</span>
                   </div>
                   <div class="mix-allocation">
                     <span class="mix-control-label" aria-hidden="true">Share</span>
-                    <input type="range" class="mix-slider" id="reitsSlider" aria-label="REITs allocation percentage" min="0" max="100" step="5" value="0" onchange="updateMix('reits')">
-                    <span class="mix-percentage" id="reitsPercentage">0%</span>
+                    <input type="range" class="mix-slider" id="reitsSlider" min="0" max="100" step="5" value="0" onchange="updateMix('reits')" aria-label="REITs allocation percentage">
+                    <span class="mix-percentage" id="reitsPercentage" aria-live="polite">0%</span>
                   </div>
                 </div>
               </div>
@@ -277,13 +275,13 @@
 
           <!-- Time Period -->
           <div class="input-group">
-            <label class="input-label">Investment Period (Years)</label>
+            <label for="yearsSlider" class="input-label">Investment Period (Years)</label>
             <div class="slider-container">
               <div class="slider-wrapper">
-                <input type="range" class="slider" id="yearsSlider" min="1" max="40" step="1" value="20" onchange="updateSlider()">
-                <div class="slider-value" id="yearsValue">20 Years</div>
+                <input type="range" class="slider" id="yearsSlider" min="1" max="40" step="1" value="20" onchange="updateSlider()" aria-describedby="yearsValue">
+                <div class="slider-value" id="yearsValue" aria-live="polite">20 Years</div>
               </div>
-              <div class="slider-labels">
+              <div class="slider-labels" aria-hidden="true">
                 <span>Short (5Y)</span>
                 <span>Long (30Y)</span>
               </div>
@@ -305,18 +303,34 @@
           <div id="epfSection" class="epf-section">
             <!-- Monthly Salary -->
             <div class="input-group compact">
-              <label class="input-label">Monthly Salary (RM)</label>
+              <label for="salaryInput" class="input-label">Monthly Salary (RM)</label>
               <div class="input-stepper">
                 <button type="button" class="stepper-btn" onclick="adjustValue('salary', -500)" aria-label="Decrease monthly salary">−</button>
                 <input type="text" class="stepper-input" id="salaryInput" value="5,000" onchange="updateFromInput('salary')" oninput="formatAndUpdate('salary')" placeholder="0">
                 <button type="button" class="stepper-btn" onclick="adjustValue('salary', 500)" aria-label="Increase monthly salary">+</button>
               </div>
-              <div class="epf-rate-info" id="epfRateInfo"></div>
+              <div class="epf-rate-info" id="epfRateInfo">
+                Employment EPF: 23% (RM 1,150)<br>
+                <strong>Total Monthly EPF: RM 1,150</strong>
+              </div>
+            </div>
+
+            <!-- Additional Voluntary EPF -->
+            <div class="input-group compact">
+              <label for="voluntaryEPFInput" class="input-label optional-label">Additional Voluntary EPF (RM)</label>
+              <div class="input-stepper">
+                <button type="button" class="stepper-btn" onclick="adjustValue('voluntaryEPF', -100)" aria-label="Decrease voluntary EPF">−</button>
+                <input type="text" class="stepper-input" id="voluntaryEPFInput" value="0" onchange="updateFromInput('voluntaryEPF')" oninput="formatAndUpdate('voluntaryEPF')" placeholder="0">
+                <button type="button" class="stepper-btn" onclick="adjustValue('voluntaryEPF', 100)" aria-label="Increase voluntary EPF">+</button>
+              </div>
+              <div style="margin-top: 0.3rem; font-size: 0.7rem; color: var(--gray-400);">
+                Personal contributions beyond employment EPF
+              </div>
             </div>
 
             <!-- Current EPF Balance -->
             <div class="input-group compact">
-              <label class="input-label optional-label">Current EPF Balance (RM)</label>
+              <label for="epfBalanceInput" class="input-label optional-label">Current EPF Balance (RM)</label>
               <div class="input-stepper">
                 <button type="button" class="stepper-btn" onclick="adjustValue('epfBalance', -5000)" aria-label="Decrease EPF balance">−</button>
                 <input type="text" class="stepper-input" id="epfBalanceInput" value="50,000" onchange="updateFromInput('epfBalance')" oninput="formatAndUpdate('epfBalance')" placeholder="0">
@@ -326,16 +340,16 @@
 
             <!-- EPF Dividend Rate -->
             <div class="input-group compact">
-              <label class="input-label">
+              <label for="epfDividendSlider" class="input-label">
                 EPF Dividend Rate (%)
-                <a href="https://www.kwsp.gov.my/en/others/resource-centre/dividend" target="_blank" class="epf-link">Check latest rates</a>
+                <a href="https://www.kwsp.gov.my/en/others/resource-centre/dividend" target="_blank" rel="noopener noreferrer" class="epf-link">Check latest rates</a>
               </label>
               <div class="slider-container">
                 <div class="slider-wrapper">
-                  <input type="range" class="slider epf-slider" id="epfDividendSlider" min="3" max="8" step="0.1" value="5.5" onchange="updateSlider()">
-                  <div class="slider-value epf-value" id="epfDividendValue">5.5%</div>
+                  <input type="range" class="slider epf-slider" id="epfDividendSlider" min="3" max="8" step="0.1" value="5.5" onchange="updateSlider()" aria-describedby="epfDividendValue">
+                  <div class="slider-value epf-value" id="epfDividendValue" aria-live="polite">5.5%</div>
                 </div>
-                <div class="slider-labels">
+                <div class="slider-labels" aria-hidden="true">
                   <span>Conservative (3%)</span>
                   <span>Historical (6%)</span>
                 </div>
@@ -346,30 +360,30 @@
           <button class="calculate-btn" onclick="calculate()">
             Calculate My Wealth
           </button>
-        </div>
+        </section>
 
         <!-- Right Panel - Results -->
-        <div class="results-panel">
-          <div id="loadingState" class="loading" style="display: none;">
-            <div class="spinner"></div>
+        <section class="results-panel" aria-label="Calculation results">
+          <div id="loadingState" class="loading" style="display: none;" aria-live="polite">
+            <div class="spinner" aria-hidden="true"></div>
             <p>Calculating...</p>
           </div>
 
           <div id="resultsContent">
             <!-- Chart with Blank State -->
-            <div class="chart-container">
+            <div class="chart-container" role="img" aria-label="Wealth projection chart">
               <div id="blankState" class="blank-state">
                 <div class="blank-state-icon">
-                  <img class="gelatine" src="assets/img/blank-state-ramen.svg">
+                  <img class="gelatine" src="assets/img/blank-state-ramen.svg" alt="">
                 </div>
                 <h3>Ready to Calculate?</h3>
                 <p>Adjust your investment parameters on the left and click "Calculate My Wealth" to see your projected growth.</p>
               </div>
-              <div id="loadingStateChart" class="loading" style="display: none;">
-                <div class="spinner"></div>
+              <div id="loadingStateChart" class="loading" style="display: none;" aria-live="polite">
+                <div class="spinner" aria-hidden="true"></div>
                 <p>Calculating...</p>
               </div>
-              <canvas id="wealthChart" style="display: none;"></canvas>
+              <canvas id="wealthChart" style="display: none;" aria-label="Wealth growth over time chart"></canvas>
             </div>
 
             <!-- Wealth Summary -->
@@ -386,51 +400,134 @@
               </ul>
             </div>
 
-            <!-- Progress Milestones -->
-            <div class="progress-section">
-              <h3>Your Wealth Journey</h3>
-              <div class="update-bar" aria-hidden="true"></div>
-              <div id="progressContainer">
-                <div class="progress-item">
-                  <div class="progress-info">
-                    <div class="progress-year">Year 5</div>
-                    <span>First milestone</span>
+            <!-- Updated Wealth Journey Section with collapsible container -->
+            <div class="wealth-journey" role="region" aria-label="Wealth milestones">
+              <div class="wealth-journey-header" onclick="toggleWealthJourney()" role="button" tabindex="0" aria-expanded="true" aria-controls="wealthJourneyDetails">
+                <h3>Your Wealth Journey</h3>
+                <button class="wealth-journey-toggle-btn" id="wealthJourneyToggleBtn" aria-label="Toggle wealth journey">
+                  <span class="wealth-journey-toggle-icon">−</span>
+                </button>
+              </div>
+              <div class="wealth-journey-details" id="wealthJourneyDetails">
+                <div class="wealth-journey-content">
+                  <div class="update-bar" aria-hidden="true"></div>
+                  <div id="progressContainer" role="list">
+                    <div class="progress-item" role="listitem">
+                      <div class="progress-info">
+                        <div class="progress-year">Year 10</div>
+                        <span class="progress-description">Building wealth</span>
+                      </div>
+                      <div class="progress-total">
+                        <div class="progress-amount">RM 0</div>
+                      </div>
+                    </div>
+                    <div class="progress-item" role="listitem">
+                      <div class="progress-info">
+                        <div class="progress-year">Year 20</div>
+                        <span class="progress-description">Investment goal</span>
+                      </div>
+                      <div class="progress-total">
+                        <div class="progress-amount">RM 0</div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="progress-amount">RM 0</div>
                 </div>
-                <div class="progress-item">
-                  <div class="progress-info">
-                    <div class="progress-year">Year 10</div>
-                    <span>Building wealth</span>
+              </div>
+            </div>
+
+            <!-- Calculation Breakdown Section -->
+            <div class="calculation-breakdown" id="calculationBreakdown" >
+              <div class="breakdown-header" onclick="toggleCalculationBreakdown()" role="button" tabindex="0" aria-expanded="false" aria-controls="breakdownDetails">
+                <h3>Calculation Breakdown</h3>
+                <button class="breakdown-toggle-btn" id="breakdownToggleBtn" aria-label="Toggle calculation breakdown">
+                  <span class="breakdown-toggle-icon">+</span>
+                </button>
+              </div>
+              <div class="breakdown-details collapsed" id="breakdownDetails">
+                <div class="breakdown-content">
+                  <div class="breakdown-disclaimer">
+                    <div class="disclaimer-text">
+                      <strong>Important Note:</strong> EPF dividend rates vary yearly (historically 4-6%). This calculator uses your input rate as an average for projection purposes. Actual results may differ based on KWSP's annual dividend declarations.
+                    </div>
                   </div>
-                  <div class="progress-amount">RM 0</div>
-                </div>
-                <div class="progress-item">
-                  <div class="progress-info">
-                    <div class="progress-year">Year 20</div>
-                    <span>Investment goal</span>
+                  
+                  <div class="breakdown-sections">
+                    <div class="breakdown-section">
+                      <h4>Personal Investment Calculation</h4>
+                      <div class="calc-formula">
+                        <div class="formula-line">
+                          <span class="formula-label">Monthly Investment:</span>
+                          <span class="formula-value" id="breakdownMonthly">RM 1,000</span>
+                        </div>
+                        <div class="formula-line">
+                          <span class="formula-label">Initial Amount:</span>
+                          <span class="formula-value" id="breakdownInitial">RM 0</span>
+                        </div>
+                        <div class="formula-line">
+                          <span class="formula-label">Annual Return:</span>
+                          <span class="formula-value" id="breakdownReturn">7.0%</span>
+                        </div>
+                        <div class="formula-line">
+                          <span class="formula-label">Investment Period:</span>
+                          <span class="formula-value" id="breakdownYears">20 years</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="breakdown-section" id="epfBreakdownSection">
+                      <h4>EPF Calculation</h4>
+                      <div class="calc-formula">
+                        <div class="formula-line">
+                          <span class="formula-label">Monthly Salary:</span>
+                          <span class="formula-value" id="breakdownSalary">RM 5,000</span>
+                        </div>
+                        <div class="formula-line">
+                          <span class="formula-label">Employment EPF Rate:</span>
+                          <span class="formula-value" id="breakdownEmploymentRate">23% (Employee 11% + Employer 12%)</span>
+                        </div>
+                        <div class="formula-line">
+                          <span class="formula-label">Employment Contribution:</span>
+                          <span class="formula-value" id="breakdownEmploymentContrib">RM 1,150</span>
+                        </div>
+                        <div class="formula-line" id="voluntaryEPFLine" style="display: none;">
+                          <span class="formula-label">Voluntary EPF:</span>
+                          <span class="formula-value" id="breakdownVoluntaryEPF">RM 0</span>
+                        </div>
+                        <div class="formula-line total-line">
+                          <span class="formula-label"><strong>Total Monthly EPF:</strong></span>
+                          <span class="formula-value" id="breakdownTotalEPF"><strong>RM 1,150</strong></span>
+                        </div>
+                        <div class="formula-line">
+                          <span class="formula-label">Current EPF Balance:</span>
+                          <span class="formula-value" id="breakdownEPFBalance">RM 50,000</span>
+                        </div>
+                        <div class="formula-line">
+                          <span class="formula-label">EPF Dividend Rate:</span>
+                          <span class="formula-value" id="breakdownEPFRate">5.5% (average)</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="progress-amount">RM 0</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
-  </section>
+  </main>
 
-  <!-- Simple Instructions -->
-  <div class="simple-instructions" style="display: none;">
-    <p>Set your monthly investment amount, expected annual returns, and investment timeline. Optionally include your salary to track EPF contributions alongside your voluntary investments. The calculator shows your complete wealth projection with detailed breakdowns of investment growth, EPF accumulation, and milestone achievements over time.</p>
-  </div>
-
-  <!-- Footer -->
-  <footer class="footer">
+  <!-- Footer with proper semantic structure -->
+  <footer class="footer" role="contentinfo">
     <div class="footer-content">
       <p>Vibed by Shin 2025</p>
     </div>
   </footer>
+
+  <!-- Screen reader only helper text -->
+  <div class="sr-only">
+    <p>This wealth calculator helps you project investment growth over time. Use the form controls to adjust parameters and view results in the chart and summary sections.</p>
+  </div>
 
   <script src="assets/js/calculator.js"></script>
 </body>
