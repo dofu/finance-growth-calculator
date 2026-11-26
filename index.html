@@ -14,7 +14,8 @@
   <section class="hero">
     <div class="hero-content">
       <h1><span class="build-text">Build Your</span> <span class="accent-text">Wealth</span></h1>
-      <p>See what monthly investing and EPF could grow to, in ringgit.</p>
+      <p class="hero-stat"><strong>78.5%</strong> of EPF members aged 56 to 60 have less than RM390,000, the basic savings EPF sets for retirement (<a href="https://www.thestar.com.my/news/nation/2026/03/15/easing-the-road-to-retirement-with-epf" target="_blank" rel="noopener">EPF data, March 2026</a>).</p>
+      <p>See what monthly investing on top of EPF could grow to, in ringgit.</p>
     </div>
   </section>
 
@@ -374,7 +375,9 @@
             <!-- Wealth Summary -->
             <div class="wealth-summary" role="region" aria-label="Wealth summary">
               <div class="summary-label" id="summaryLabel">Final wealth</div>
+              <div class="update-bar" aria-hidden="true"></div>
               <div class="summary-total" id="eqFinalAmount">RM 0</div>
+              <p class="summary-range" id="summaryRange"></p>
               <div class="summary-bar" id="summaryBar" role="img" aria-label="Split of final wealth"></div>
               <ul class="summary-parts">
                 <li class="part-invest"><span class="swatch"></span><span class="part-name">Your investments</span><span class="part-amount" id="partInvest">RM 0</span></li>
@@ -386,6 +389,7 @@
             <!-- Progress Milestones -->
             <div class="progress-section">
               <h3>Your Wealth Journey</h3>
+              <div class="update-bar" aria-hidden="true"></div>
               <div id="progressContainer">
                 <div class="progress-item">
                   <div class="progress-info">

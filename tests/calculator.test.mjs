@@ -22,6 +22,7 @@ function fakeElement(id) {
     addEventListener() {},
     appendChild(child) { (this.children ||= []).push(child); },
     getContext: () => ({}),
+    querySelectorAll: () => [],
   };
 }
 
@@ -55,6 +56,10 @@ function load({ missing = [] } = {}) {
 }
 
 const rm = n => `RM ${Math.round(n).toLocaleString()}`;
+const num = s => Number(String(s).replace(/[^\d-]/g, ''));
+// The figure "If every year paid exactly the average" from the summary
+const averageShown = el => el('summaryRange').textContent.match(/exactly the average: (RM [\d,]+)/)[1];
+const rangeShown = el => el('summaryRange').textContent.match(/between (RM [\d,]+) and (RM [\d,]+)/).slice(1).map(num);
 
 // Future value of a starting sum plus a fixed deposit at the end of each month.
 function futureValue(start, monthly, annualRatePct, years) {
@@ -243,22 +248,22 @@ test('a salary below RM 1,000 is raised to the minimum when the field is left', 
 
 // Full calculation and what the page shows
 
-test('final wealth equals investments plus EPF (default inputs)', () => {
+test('the average line equals investments plus EPF at fixed rates (default inputs)', () => {
   const { api, el } = load();
   api.calculate();
   const invest = futureValue(0, 1000, 7, 20);
   const epf = futureValue(50000, 1200, 5.5, 20);
-  assert.equal(el('eqFinalAmount').textContent, rm(invest + epf));
+  assert.equal(averageShown(el), rm(invest + epf));
+  assert.equal(averageShown(el), 'RM 1,193,511');
   assert.equal(el('partInvest').textContent, rm(1000 * 240));
   assert.equal(el('partEpf').textContent, rm(50000 + 1200 * 240));
-  assert.equal(el('eqFinalAmount').textContent, 'RM 1,193,511');
 });
 
 test('without EPF only the investment is counted', () => {
   const { api, el } = load();
   api.values.includeEPF = false;
   api.calculate();
-  assert.equal(el('eqFinalAmount').textContent, rm(futureValue(0, 1000, 7, 20)));
+  assert.equal(averageShown(el), rm(futureValue(0, 1000, 7, 20)));
   assert.equal(el('partInvest').textContent, rm(240000));
   assert.equal(el('partEpfRow').hidden, true);
 });
@@ -267,7 +272,6 @@ test('investments, EPF and growth add up to final wealth', () => {
   const { api, el } = load();
   Object.assign(api.values, { monthly: 750, initial: 20000, returnRate: 8.2, years: 33, salary: 7200, voluntaryEPF: 150 });
   api.calculate();
-  const num = s => Number(s.replace(/[^\d-]/g, ''));
   const diff = num(el('partInvest').textContent) + num(el('partEpf').textContent) + num(el('eqTotalInterest').textContent) - num(el('eqFinalAmount').textContent);
   assert.ok(Math.abs(diff) <= 1, `rounding gap ${diff}`);
 });
@@ -278,7 +282,7 @@ test('chart has one point per year and three lines with EPF on', () => {
   api.calculate();
   const { data } = charts.at(-1).config;
   assert.equal(data.labels.length, 12);
-  assert.deepEqual([...data.datasets.map(d => d.label)], ['Total Wealth', 'EPF Balance', 'Investment Balance']);
+  assert.deepEqual([...data.datasets.map(d => d.label)], ['Total Wealth', 'Likely range', 'range-low', 'EPF Balance', 'Investment Balance']);
 });
 
 test('chart labels show age when age is set', () => {
@@ -309,7 +313,7 @@ test('the calculation works on V1, which has no voluntary EPF field or breakdown
     'breakdownMonthly', 'breakdownInitial', 'breakdownYears', 'breakdownReturn', 'epfBreakdownSection'];
   const { api, el } = load({ missing });
   api.adjustValue('monthly', 100);
-  assert.equal(el('eqFinalAmount').textContent, rm(futureValue(0, 1100, 7, 20) + futureValue(50000, 1200, 5.5, 20)));
+  assert.equal(averageShown(el), rm(futureValue(0, 1100, 7, 20) + futureValue(50000, 1200, 5.5, 20)));
 });
 
 test('mix breakdown amounts add up to the milestone total', () => {
@@ -328,7 +332,7 @@ test('the summary names the period and splits EPF into your share, your employer
   const { api, el } = load();
   api.values.age = 30;
   api.calculate();
-  assert.equal(el('summaryLabel').textContent, 'Final wealth after 20 years (age 50)');
+  assert.equal(el('summaryLabel').textContent, 'Likely final wealth after 20 years (age 50)');
   assert.equal(el('partEpfNote').textContent, 'RM 132,000 from your salary, RM 156,000 from your employer, RM 50,000 you have now');
   assert.equal((el('summaryBar').innerHTML.match(/<span/g) || []).length, 3);
 });
@@ -337,9 +341,9 @@ test('milestone captions state what was put in and what it grew by', () => {
   const { api, el } = load();
   api.values.includeEPF = false;
   api.calculate();
-  const last = el('progressContainer').children.at(-1).innerHTML;
-  const growth = futureValue(0, 1000, 7, 20) - 240000;
-  assert.match(last.replace(/<[^>]+>/g, ''), new RegExp(`RM 240,000 put in, ${rm(growth)} growth`));
+  const last = el('progressContainer').children.at(-1).innerHTML.replace(/<[^>]+>/g, '');
+  const growth = num(el('eqFinalAmount').textContent) - 240000;
+  assert.match(last, new RegExp(`RM 240,000 put in, ${rm(growth)} growth`));
 });
 
 test('EPF is 11% from the employee plus 13% from the employer up to RM 5,000, 12% above', () => {
@@ -350,4 +354,30 @@ test('EPF is 11% from the employee plus 13% from the employer up to RM 5,000, 12
   const high = api.calculateEPF(8000, 0, 0, 5.5, 1);
   assert.equal(high.monthlyEmployeeContribution, 880);
   assert.equal(high.monthlyEmployerContribution, 960);
+});
+
+test('the likely range brackets the middle outcome, which sits below the fixed-rate average', () => {
+  const { api, el } = load();
+  api.calculate();
+  const [low, high] = rangeShown(el);
+  const likely = num(el('eqFinalAmount').textContent);
+  assert.ok(low < likely && likely < high, `${low} ${likely} ${high}`);
+  assert.ok(likely < num(averageShown(el)));
+});
+
+test('with no swing the likely outcome equals the average', () => {
+  const { api, el } = load();
+  Object.assign(api.values, { useMix: true, includeEPF: false });
+  for (const k of ['etf', 'unitTrust', 'stocks']) { el(k + 'Enabled').checked = false; api.toggleInvestmentType(k); }
+  api.values.mixReturns.fd = 3.5; // fixed deposit swings 0.5 points a year
+  api.calculate();
+  const likely = num(el('eqFinalAmount').textContent);
+  const average = num(averageShown(el));
+  assert.ok(Math.abs(likely - average) / average < 0.005, `${likely} vs ${average}`);
+});
+
+test('the same inputs always give the same range', () => {
+  const a = load(); a.api.calculate();
+  const b = load(); b.api.calculate();
+  assert.equal(a.el('summaryRange').textContent, b.el('summaryRange').textContent);
 });
