@@ -12,7 +12,7 @@
 </head>
 <body>
   <!-- Header Section with proper semantic HTML -->
-  <header role="banner">
+  <header class="hero" role="banner">
     <div class="hero-content">
       <h1><span class="build-text">Build Your</span> <span class="gradient-text">Wealth</span></h1>
       <p>Create realistic wealth projections using customizable investment portfolios and EPF tracking. Adjust return rates for different investment types to match your actual strategy and risk tolerance.</p>
@@ -58,7 +58,7 @@
   </section>
 
   <!-- Main Calculator -->
-  <main role="main">
+  <main class="calculator-section" role="main">
     <div class="calculator-card">
       <div class="calculator-grid">
         <!-- Left Panel - Inputs -->
@@ -325,10 +325,7 @@
             <div class="chart-container" role="img" aria-label="Wealth projection chart">
               <div id="blankState" class="blank-state">
                 <div class="blank-state-icon">
-                  <svg viewBox="0 0 100 100" class="gelatine" aria-hidden="true">
-                    <circle cx="50" cy="50" r="40" fill="#4ECDC4" opacity="0.8"/>
-                    <text x="50" y="60" text-anchor="middle" font-size="30" fill="white">💰</text>
-                  </svg>
+                  <img class="gelatine" src="assets/img/blank-state-ramen.svg" alt="">
                 </div>
                 <h3>Ready to Calculate?</h3>
                 <p>Adjust your investment parameters on the left and click "Calculate My Wealth" to see your projected growth.</p>
@@ -480,7 +477,7 @@
   </main>
 
   <!-- Footer with proper semantic structure -->
-  <footer role="contentinfo">
+  <footer class="footer" role="contentinfo">
     <div class="footer-content">
       <p>Vibed by Shin 2025</p>
     </div>

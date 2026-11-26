@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
   <title>💰 WealthGrow - Smart Investment Calculator</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -11,43 +10,47 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
-  <!-- Header Section with proper semantic HTML -->
-  <header role="banner">
+  <!-- Hero Section -->
+  <section class="hero">
     <div class="hero-content">
       <h1><span class="build-text">Build Your</span> <span class="gradient-text">Wealth</span></h1>
       <p>Create realistic wealth projections using customizable investment portfolios and EPF tracking. Adjust return rates for different investment types to match your actual strategy and risk tolerance.</p>
     </div>
-  </header>
+  </section>
 
   <!-- Instructions Section -->
-  <section class="instructions-banner" aria-label="How to use calculator">
+  <section class="instructions-banner">
     <div class="instructions-content">
-      <div class="instructions-header" onclick="toggleInstructions()" role="button" tabindex="0" aria-expanded="false" aria-controls="instructionSteps">
+      <div class="instructions-header" onclick="toggleInstructions()">
         <h3>How It Works</h3>
-        <button class="toggle-btn" id="toggleBtn" aria-label="Toggle instructions">
+        <button class="toggle-btn" id="toggleBtn">
           <span class="toggle-icon">−</span>
         </button>
       </div>
       <div class="instruction-steps" id="instructionSteps">
         <div class="step-item">
+          <div class="step-icon">💰</div>
           <div class="step-content">
             <h4>Set Investment Amount</h4>
             <p>Enter monthly contributions and optional initial lump sum</p>
           </div>
         </div>
         <div class="step-item">
+          <div class="step-icon">📊</div>
           <div class="step-content">
             <h4>Choose Investment Strategy</h4>
             <p>Use simple returns or customize portfolio mix with specific allocations</p>
           </div>
         </div>
         <div class="step-item">
+          <div class="step-icon">🏦</div>
           <div class="step-content">
             <h4>Include EPF (Optional)</h4>
             <p>Add salary to track mandatory EPF alongside personal investments</p>
           </div>
         </div>
         <div class="step-item">
+          <div class="step-icon">🎯</div>
           <div class="step-content">
             <h4>View Wealth Projection</h4>
             <p>See complete breakdown: investments, EPF, and realistic growth milestones</p>
@@ -58,54 +61,53 @@
   </section>
 
   <!-- Main Calculator -->
-  <main role="main">
+  <section class="calculator-section">
     <div class="calculator-card">
       <div class="calculator-grid">
         <!-- Left Panel - Inputs -->
-        <section class="inputs-panel" aria-label="Investment parameters">
+        <div class="inputs-panel">
           <h2 class="panel-title">Investment Parameters</h2>
           <p class="panel-subtitle">Adjust the values below to see how your investments will grow</p>
 
           <!-- Current Age -->
           <div class="input-group compact">
-            <label for="ageInput" class="input-label optional-label">Current Age</label>
+            <label class="input-label optional-label">Current Age</label>
             <div class="input-stepper">
-              <button class="stepper-btn" onclick="adjustValue('age', -1)" aria-label="Decrease age">−</button>
-              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="25" aria-describedby="age-help">
-              <button class="stepper-btn" onclick="adjustValue('age', 1)" aria-label="Increase age">+</button>
+              <button class="stepper-btn" onclick="adjustValue('age', -1)">−</button>
+              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="25">
+              <button class="stepper-btn" onclick="adjustValue('age', 1)">+</button>
             </div>
-            <div id="age-help" class="sr-only">Optional field to show age progression in results</div>
           </div>
 
           <!-- Monthly Investment -->
           <div class="input-group">
-            <label for="monthlyInput" class="input-label">Monthly Investment (RM)</label>
+            <label class="input-label">Monthly Investment (RM)</label>
             <div class="input-stepper">
-              <button class="stepper-btn" onclick="adjustValue('monthly', -100)" aria-label="Decrease monthly investment">−</button>
-              <input type="text" class="stepper-input" id="monthlyInput" value="1,000" onchange="updateFromInput('monthly')" oninput="formatAndUpdate('monthly')" placeholder="0" aria-required="true">
-              <button class="stepper-btn" onclick="adjustValue('monthly', 100)" aria-label="Increase monthly investment">+</button>
+              <button class="stepper-btn" onclick="adjustValue('monthly', -100)">−</button>
+              <input type="text" class="stepper-input" id="monthlyInput" value="1,000" onchange="updateFromInput('monthly')" oninput="formatAndUpdate('monthly')" placeholder="0">
+              <button class="stepper-btn" onclick="adjustValue('monthly', 100)">+</button>
             </div>
           </div>
 
           <!-- Initial Investment -->
           <div class="input-group compact">
-            <label for="initialInput" class="input-label optional-label">Initial Investment (RM)</label>
+            <label class="input-label optional-label">Initial Investment (RM)</label>
             <div class="input-stepper">
-              <button class="stepper-btn" onclick="adjustValue('initial', -1000)" aria-label="Decrease initial investment">−</button>
+              <button class="stepper-btn" onclick="adjustValue('initial', -1000)">−</button>
               <input type="text" class="stepper-input" id="initialInput" value="0" onchange="updateFromInput('initial')" oninput="formatAndUpdate('initial')" placeholder="0">
-              <button class="stepper-btn" onclick="adjustValue('initial', 1000)" aria-label="Increase initial investment">+</button>
+              <button class="stepper-btn" onclick="adjustValue('initial', 1000)">+</button>
             </div>
           </div>
 
           <!-- Annual Return -->
           <div class="input-group">
-            <label for="returnSlider" class="input-label">Expected Annual Return (%)</label>
+            <label class="input-label">Expected Annual Return (%)</label>
             <div class="slider-container">
               <div class="slider-wrapper">
-                <input type="range" class="slider" id="returnSlider" min="1" max="15" step="0.1" value="7" onchange="updateSlider()" aria-describedby="returnValue">
-                <div class="slider-value" id="returnValue" aria-live="polite">7.0%</div>
+                <input type="range" class="slider" id="returnSlider" min="1" max="15" step="0.1" value="7" onchange="updateSlider()">
+                <div class="slider-value" id="returnValue">7.0%</div>
               </div>
-              <div class="slider-labels" aria-hidden="true">
+              <div class="slider-labels">
                 <span>Conservative (3%)</span>
                 <span>Aggressive (12%)</span>
               </div>
@@ -127,7 +129,7 @@
               <h4>Portfolio Allocation</h4>
               <div class="blended-return">
                 <span class="blended-label">Blended Return:</span>
-                <span class="blended-rate" id="blendedRate" aria-live="polite">7.0%</span>
+                <span class="blended-rate" id="blendedRate">7.0%</span>
               </div>
             </div>
             
@@ -143,12 +145,12 @@
                 </div>
                 <div class="mix-config" id="etfConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="etfReturnSlider" min="3" max="12" step="0.1" value="7.0" onchange="updateMixReturn('etf')" aria-label="ETF return rate">
-                    <span class="mix-return-rate" id="etfReturnRate" aria-live="polite">7.0%</span>
+                    <input type="range" class="return-slider" id="etfReturnSlider" min="3" max="12" step="0.1" value="7.0" onchange="updateMixReturn('etf')">
+                    <span class="mix-return-rate" id="etfReturnRate">7.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="etfSlider" min="0" max="100" step="5" value="40" onchange="updateMix()" aria-label="ETF allocation percentage">
-                    <span class="mix-percentage" id="etfPercentage" aria-live="polite">40%</span>
+                    <input type="range" class="mix-slider" id="etfSlider" min="0" max="100" step="5" value="40" onchange="updateMix()">
+                    <span class="mix-percentage" id="etfPercentage">40%</span>
                   </div>
                 </div>
               </div>
@@ -164,12 +166,12 @@
                 </div>
                 <div class="mix-config" id="unitTrustConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="unitTrustReturnSlider" min="2" max="15" step="0.1" value="6.0" onchange="updateMixReturn('unitTrust')" aria-label="Unit trust return rate">
-                    <span class="mix-return-rate" id="unitTrustReturnRate" aria-live="polite">6.0%</span>
+                    <input type="range" class="return-slider" id="unitTrustReturnSlider" min="2" max="15" step="0.1" value="6.0" onchange="updateMixReturn('unitTrust')">
+                    <span class="mix-return-rate" id="unitTrustReturnRate">6.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="unitTrustSlider" min="0" max="100" step="5" value="30" onchange="updateMix()" aria-label="Unit trust allocation percentage">
-                    <span class="mix-percentage" id="unitTrustPercentage" aria-live="polite">30%</span>
+                    <input type="range" class="mix-slider" id="unitTrustSlider" min="0" max="100" step="5" value="30" onchange="updateMix()">
+                    <span class="mix-percentage" id="unitTrustPercentage">30%</span>
                   </div>
                 </div>
               </div>
@@ -185,12 +187,12 @@
                 </div>
                 <div class="mix-config" id="fdConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="fdReturnSlider" min="2" max="5" step="0.1" value="3.5" onchange="updateMixReturn('fd')" aria-label="Fixed deposit return rate">
-                    <span class="mix-return-rate" id="fdReturnRate" aria-live="polite">3.5%</span>
+                    <input type="range" class="return-slider" id="fdReturnSlider" min="2" max="5" step="0.1" value="3.5" onchange="updateMixReturn('fd')">
+                    <span class="mix-return-rate" id="fdReturnRate">3.5%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="fdSlider" min="0" max="100" step="5" value="20" onchange="updateMix()" aria-label="Fixed deposit allocation percentage">
-                    <span class="mix-percentage" id="fdPercentage" aria-live="polite">20%</span>
+                    <input type="range" class="mix-slider" id="fdSlider" min="0" max="100" step="5" value="20" onchange="updateMix()">
+                    <span class="mix-percentage" id="fdPercentage">20%</span>
                   </div>
                 </div>
               </div>
@@ -206,12 +208,12 @@
                 </div>
                 <div class="mix-config" id="stocksConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="stocksReturnSlider" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('stocks')" aria-label="Stocks return rate">
-                    <span class="mix-return-rate" id="stocksReturnRate" aria-live="polite">10.0%</span>
+                    <input type="range" class="return-slider" id="stocksReturnSlider" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('stocks')">
+                    <span class="mix-return-rate" id="stocksReturnRate">10.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="stocksSlider" min="0" max="100" step="5" value="10" onchange="updateMix()" aria-label="Stocks allocation percentage">
-                    <span class="mix-percentage" id="stocksPercentage" aria-live="polite">10%</span>
+                    <input type="range" class="mix-slider" id="stocksSlider" min="0" max="100" step="5" value="10" onchange="updateMix()">
+                    <span class="mix-percentage" id="stocksPercentage">10%</span>
                   </div>
                 </div>
               </div>
@@ -219,20 +221,20 @@
 
             <div class="mix-total">
               <span class="total-label">Total Allocation:</span>
-              <span class="total-percentage" id="totalPercentage" aria-live="polite">100%</span>
-              <span class="allocation-status" id="allocationStatus" aria-live="polite">✓ Balanced</span>
+              <span class="total-percentage" id="totalPercentage">100%</span>
+              <span class="allocation-status" id="allocationStatus">✓ Balanced</span>
             </div>
           </div>
 
           <!-- Time Period -->
           <div class="input-group">
-            <label for="yearsSlider" class="input-label">Investment Period (Years)</label>
+            <label class="input-label">Investment Period (Years)</label>
             <div class="slider-container">
               <div class="slider-wrapper">
-                <input type="range" class="slider" id="yearsSlider" min="1" max="40" step="1" value="20" onchange="updateSlider()" aria-describedby="yearsValue">
-                <div class="slider-value" id="yearsValue" aria-live="polite">20 Years</div>
+                <input type="range" class="slider" id="yearsSlider" min="1" max="40" step="1" value="20" onchange="updateSlider()">
+                <div class="slider-value" id="yearsValue">20 Years</div>
               </div>
-              <div class="slider-labels" aria-hidden="true">
+              <div class="slider-labels">
                 <span>Short (5Y)</span>
                 <span>Long (30Y)</span>
               </div>
@@ -254,36 +256,36 @@
           <div id="epfSection" class="epf-section">
             <!-- Monthly Salary -->
             <div class="input-group compact">
-              <label for="salaryInput" class="input-label">Monthly Salary (RM)</label>
+              <label class="input-label">Monthly Salary (RM)</label>
               <div class="input-stepper">
-                <button class="stepper-btn" onclick="adjustValue('salary', -500)" aria-label="Decrease salary">−</button>
+                <button class="stepper-btn" onclick="adjustValue('salary', -500)">−</button>
                 <input type="text" class="stepper-input" id="salaryInput" value="5,000" onchange="updateFromInput('salary')" oninput="formatAndUpdate('salary')" placeholder="0">
-                <button class="stepper-btn" onclick="adjustValue('salary', 500)" aria-label="Increase salary">+</button>
+                <button class="stepper-btn" onclick="adjustValue('salary', 500)">+</button>
               </div>
             </div>
 
             <!-- Current EPF Balance -->
             <div class="input-group compact">
-              <label for="epfBalanceInput" class="input-label optional-label">Current EPF Balance (RM)</label>
+              <label class="input-label optional-label">Current EPF Balance (RM)</label>
               <div class="input-stepper">
-                <button class="stepper-btn" onclick="adjustValue('epfBalance', -5000)" aria-label="Decrease EPF balance">−</button>
+                <button class="stepper-btn" onclick="adjustValue('epfBalance', -5000)">−</button>
                 <input type="text" class="stepper-input" id="epfBalanceInput" value="50,000" onchange="updateFromInput('epfBalance')" oninput="formatAndUpdate('epfBalance')" placeholder="0">
-                <button class="stepper-btn" onclick="adjustValue('epfBalance', 5000)" aria-label="Increase EPF balance">+</button>
+                <button class="stepper-btn" onclick="adjustValue('epfBalance', 5000)">+</button>
               </div>
             </div>
 
             <!-- EPF Dividend Rate -->
             <div class="input-group compact">
-              <label for="epfDividendSlider" class="input-label">
+              <label class="input-label">
                 EPF Dividend Rate (%)
-                <a href="https://www.kwsp.gov.my/en/others/resource-centre/dividend" target="_blank" rel="noopener noreferrer" class="epf-link">Check latest rates</a>
+                <a href="https://www.kwsp.gov.my/en/others/resource-centre/dividend" target="_blank" class="epf-link">Check latest rates</a>
               </label>
               <div class="slider-container">
                 <div class="slider-wrapper">
-                  <input type="range" class="slider epf-slider" id="epfDividendSlider" min="3" max="8" step="0.1" value="5.5" onchange="updateSlider()" aria-describedby="epfDividendValue">
-                  <div class="slider-value epf-value" id="epfDividendValue" aria-live="polite">5.5%</div>
+                  <input type="range" class="slider epf-slider" id="epfDividendSlider" min="3" max="8" step="0.1" value="5.5" onchange="updateSlider()">
+                  <div class="slider-value epf-value" id="epfDividendValue">5.5%</div>
                 </div>
-                <div class="slider-labels" aria-hidden="true">
+                <div class="slider-labels">
                   <span>Conservative (3%)</span>
                   <span>Historical (6%)</span>
                 </div>
@@ -294,104 +296,98 @@
           <button class="calculate-btn" onclick="calculate()">
             Calculate My Wealth
           </button>
-        </section>
+        </div>
 
         <!-- Right Panel - Results -->
-        <section class="results-panel" aria-label="Calculation results">
-          <div id="loadingState" class="loading" style="display: none;" aria-live="polite">
-            <div class="spinner" aria-hidden="true"></div>
+        <div class="results-panel">
+          <div id="loadingState" class="loading" style="display: none;">
+            <div class="spinner"></div>
             <p>Calculating your financial future...</p>
           </div>
 
           <div id="resultsContent">
             <!-- Chart with Blank State -->
-            <div class="chart-container" role="img" aria-label="Wealth projection chart">
+            <div class="chart-container">
               <div id="blankState" class="blank-state">
                 <div class="blank-state-icon">
-                  <img class="gelatine" src="assets/img/blank-state-ramen.svg" alt="">
+                  <img class="gelatine" src="assets/img/blank-state-ramen.svg">
                 </div>
                 <h3>Ready to Calculate?</h3>
                 <p>Adjust your investment parameters on the left and click "Calculate My Wealth" to see your projected growth.</p>
               </div>
-              <div id="loadingStateChart" class="loading" style="display: none;" aria-live="polite">
-                <div class="spinner" aria-hidden="true"></div>
+              <div id="loadingStateChart" class="loading" style="display: none;">
+                <div class="spinner"></div>
                 <p>Calculating your financial future...</p>
               </div>
-              <canvas id="wealthChart" style="display: none;" aria-label="Wealth growth over time chart"></canvas>
+              <canvas id="wealthChart" style="display: none;"></canvas>
             </div>
 
             <!-- Equation Layout -->
-            <div class="wealth-equation fade-in" role="region" aria-label="Wealth calculation summary">
+            <div class="wealth-equation fade-in">
               <div class="equation-box invested">
-                <div class="equation-amount" id="eqTotalContributed" aria-label="Total invested amount">RM 0</div>
+                <div class="equation-amount" id="eqTotalContributed">RM 0</div>
                 <div class="equation-label">Total Invested</div>
               </div>
               
-              <div class="equation-operator" aria-hidden="true">+</div>
+              <div class="equation-operator">+</div>
               
               <div class="equation-box interest">
-                <div class="equation-amount" id="eqTotalInterest" aria-label="Total interest earned">RM 0</div>
+                <div class="equation-amount" id="eqTotalInterest">RM 0</div>
                 <div class="equation-label">Interest Earned</div>
               </div>
               
-              <div class="equation-operator equals" aria-hidden="true">=</div>
+              <div class="equation-operator equals">=</div>
               
               <div class="equation-box final">
-                <div class="equation-amount" id="eqFinalAmount" aria-label="Final wealth amount">RM 0</div>
+                <div class="equation-amount" id="eqFinalAmount">RM 0</div>
                 <div class="equation-label">Final Wealth</div>
               </div>
             </div>
 
-            <!-- Updated Wealth Journey Section with collapsible container -->
-            <div class="wealth-journey" role="region" aria-label="Wealth milestones">
-              <div class="wealth-journey-header" onclick="toggleWealthJourney()" role="button" tabindex="0" aria-expanded="true" aria-controls="wealthJourneyDetails">
-                <h3>📈 Your Wealth Journey</h3>
-                <button class="wealth-journey-toggle-btn" id="wealthJourneyToggleBtn" aria-label="Toggle wealth journey">
-                  <span class="wealth-journey-toggle-icon">−</span>
-                </button>
-              </div>
-              <div class="wealth-journey-details" id="wealthJourneyDetails">
-                <div class="wealth-journey-content">
-                  <div id="progressContainer" role="list">
-                    <div class="progress-item" role="listitem">
-                      <div class="progress-info">
-                        <div class="progress-year">Year 10</div>
-                        <span class="progress-description">Building wealth</span>
-                      </div>
-                      <div class="progress-total">
-                        <div class="progress-amount">RM 0</div>
-                      </div>
-                    </div>
-                    <div class="progress-item" role="listitem">
-                      <div class="progress-info">
-                        <div class="progress-year">Year 20</div>
-                        <span class="progress-description">Investment goal</span>
-                      </div>
-                      <div class="progress-total">
-                        <div class="progress-amount">RM 0</div>
-                      </div>
-                    </div>
+            <!-- Progress Milestones -->
+            <div class="progress-section">
+              <h3>Your Wealth Journey</h3>
+              <div id="progressContainer">
+                <div class="progress-item">
+                  <div class="progress-info">
+                    <div class="progress-year">Year 5</div>
+                    <span>First milestone</span>
                   </div>
+                  <div class="progress-amount">RM 0</div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-info">
+                    <div class="progress-year">Year 10</div>
+                    <span>Building wealth</span>
+                  </div>
+                  <div class="progress-amount">RM 0</div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-info">
+                    <div class="progress-year">Year 20</div>
+                    <span>Investment goal</span>
+                  </div>
+                  <div class="progress-amount">RM 0</div>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </div>
-  </main>
+  </section>
 
-  <!-- Footer with proper semantic structure -->
-  <footer role="contentinfo">
+  <!-- Simple Instructions -->
+  <div class="simple-instructions" style="display: none;">
+    <p>Set your monthly investment amount, expected annual returns, and investment timeline. Optionally include your salary to track EPF contributions alongside your voluntary investments. The calculator shows your complete wealth projection with detailed breakdowns of investment growth, EPF accumulation, and milestone achievements over time.</p>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
     <div class="footer-content">
       <p>Vibed by Shin 2025</p>
     </div>
   </footer>
-
-  <!-- Screen reader only helper text -->
-  <div class="sr-only">
-    <p>This wealth calculator helps you project investment growth over time. Use the form controls to adjust parameters and view results in the chart and summary sections.</p>
-  </div>
 
   <script src="assets/js/calculator.js"></script>
 </body>
