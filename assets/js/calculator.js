@@ -74,9 +74,10 @@ function formatAndUpdate(type) {
       input.value = '';
       return; // Don't update values while typing
     }
-    const numValue = Math.max(1000, parseInt(value) || 1000);
-    values[type] = numValue;
+    const numValue = parseInt(value);
     input.value = numValue.toLocaleString();
+    if (numValue < 1000) return; // Below the minimum: wait until the field is left
+    values[type] = numValue;
     updateEPFRateInfo(); // Update EPF rate when salary changes
   } else if (type === 'voluntaryEPF') {
     // Handle voluntary EPF contributions
@@ -530,6 +531,14 @@ function calculate() {
     if (eqTotalInterestEl) eqTotalInterestEl.textContent = `RM ${Math.round(totalInterest).toLocaleString()}`;
     if (eqFinalAmountEl) eqFinalAmountEl.textContent = `RM ${Math.round(finalBalance).toLocaleString()}`;
 
+    const splitEl = document.getElementById('eqContributedSplit');
+    if (splitEl) {
+      const rm = n => `RM ${Math.round(n).toLocaleString()}`;
+      splitEl.textContent = includeEPF
+        ? `Total invested: ${rm(totalInvestmentContributed)} into your investments, ${rm(epfData.totalContributed - epfBalance)} of EPF contributions and ${rm(epfBalance)} already in EPF.`
+        : `Total invested: ${rm(totalInvestmentContributed)} into your investments.`;
+    }
+
     updateChart(combinedDataPoints, includeEPF);
     updateProgressMilestones(combinedDataPoints, age);
     updateCalculationBreakdown();
@@ -706,25 +715,9 @@ function updateProgressMilestones(dataPoints, age) {
       `Year ${milestone.year} (Age ${milestone.age})` : 
       `Year ${milestone.year}`;
     
-    let description;
-    if (index === 0) {
-      description = values.useMix ? 'Portfolio milestone reached' : 'First milestone reached';
-    } else if (index === selectedMilestones.length - 1) {
-      if (milestone.balance >= 1000000) {
-        description = 'Millionaire status achieved! 🎉';
-      } else if (milestone.balance >= 500000) {
-        description = values.includeEPF ? 'Retirement ready with EPF' : 'Retirement ready';
-      } else {
-        description = values.useMix ? 'Portfolio goal achieved' : 'Investment goal achieved';
-      }
-    } else {
-      if (milestone.balance >= 100000) {
-        description = values.useMix ? 'Six figures with diversified portfolio' : 'Six figures achieved!';
-      } else {
-        description = values.useMix ? 'Building diversified wealth' : 'Building wealth steadily';
-      }
-    }
-    
+    const putIn = milestone.totalContributed ?? milestone.contributed;
+    const description = `RM ${Math.round(putIn).toLocaleString()} put in, RM ${Math.round(milestone.balance - putIn).toLocaleString()} growth`;
+
     const includeEPF = values.includeEPF && milestone.epfBalance;
     const useMix = values.useMix;
     
@@ -805,6 +798,18 @@ function updateProgressMilestones(dataPoints, age) {
         `;
       }
       
+      const allocated = Object.keys(values.mixAllocations)
+        .filter(k => values.mixEnabled[k])
+        .reduce((sum, k) => sum + values.mixAllocations[k], 0);
+      if (mixBreakdown && allocated < 100) {
+        mixBreakdown += `
+          <div class="breakdown-item mix-unallocated">
+            <span class="breakdown-label">Not allocated (${100 - allocated}%):</span>
+            <span class="breakdown-amount">RM ${Math.round(totalInvestment * (100 - allocated) / 100).toLocaleString()}</span>
+          </div>
+        `;
+      }
+
       if (mixBreakdown) {
         breakdownHtml = `<div class="progress-breakdown">${mixBreakdown}</div>`;
       }

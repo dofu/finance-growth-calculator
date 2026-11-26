@@ -1,4 +1,4 @@
-// Unit tests for assets/js/calculator.js. Run with: node --test tests/
+// Unit tests for assets/js/calculator.js. Run with: node --test tests/*.test.mjs
 // The script is loaded into a sandbox with a minimal fake DOM, so no browser
 // or npm packages are needed.
 import { test } from 'node:test';
@@ -179,7 +179,7 @@ test('clearing the age field makes age empty again', () => {
   assert.equal(api.values.age, null);
 });
 
-test('a salary can be typed one digit at a time', { todo: 'the RM 1,000 minimum is applied on every keystroke, so typing "6" shows 1,000' }, () => {
+test('a salary can be typed one digit at a time', () => {
   const { api, el } = load();
   const input = el('salaryInput');
   input.value = '';
@@ -188,6 +188,16 @@ test('a salary can be typed one digit at a time', { todo: 'the RM 1,000 minimum 
     api.formatAndUpdate('salary');
   }
   assert.equal(api.values.salary, 6500);
+  assert.equal(input.value, (6500).toLocaleString());
+});
+
+test('a salary below RM 1,000 is raised to the minimum when the field is left', () => {
+  const { api, el } = load();
+  el('salaryInput').value = '800';
+  api.formatAndUpdate('salary');
+  assert.equal(api.values.salary, 5000); // unchanged while typing
+  api.updateFromInput('salary');
+  assert.equal(api.values.salary, 1000);
 });
 
 // Full calculation and what the page shows
@@ -259,7 +269,7 @@ test('the calculation works on V1, which has no voluntary EPF field or breakdown
   assert.equal(el('eqFinalAmount').textContent, rm(futureValue(0, 1100, 7, 20) + futureValue(50000, 1200, 5.5, 20)));
 });
 
-test('mix breakdown amounts add up to the milestone total', { todo: 'each asset is shown as its starting share of the total, not grown at its own rate' }, () => {
+test('mix breakdown amounts add up to the milestone total', () => {
   const { api, el } = load();
   Object.assign(api.values, { useMix: true, includeEPF: false });
   api.values.mixAllocations.fd = 0; // 90% allocated
@@ -269,4 +279,20 @@ test('mix breakdown amounts add up to the milestone total', { todo: 'each asset 
   const total = Number(item.match(/progress-amount">RM ([\d,]+)/)[1].replace(/,/g, ''));
   const parts = [...item.matchAll(/breakdown-amount">RM ([\d,]+)/g)].map(m => Number(m[1].replace(/,/g, '')));
   assert.ok(Math.abs(parts.reduce((a, b) => a + b, 0) - total) <= parts.length);
+});
+
+test('the total invested is split into investments, EPF contributions and the EPF starting balance', () => {
+  const { api, el } = load();
+  api.calculate();
+  assert.equal(el('eqContributedSplit').textContent,
+    'Total invested: RM 240,000 into your investments, RM 288,000 of EPF contributions and RM 50,000 already in EPF.');
+});
+
+test('milestone captions state what was put in and what it grew by', () => {
+  const { api, el } = load();
+  api.values.includeEPF = false;
+  api.calculate();
+  const last = el('progressContainer').children.at(-1).innerHTML;
+  const growth = futureValue(0, 1000, 7, 20) - 240000;
+  assert.match(last, new RegExp(`RM 240,000 put in, ${rm(growth)} growth`));
 });

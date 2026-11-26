@@ -71,7 +71,7 @@
             <label for="ageInput" class="input-label optional-label">Current Age</label>
             <div class="input-stepper">
               <button class="stepper-btn" onclick="adjustValue('age', -1)" aria-label="Decrease age">−</button>
-              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="25" aria-describedby="age-help">
+              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="" aria-describedby="age-help">
               <button class="stepper-btn" onclick="adjustValue('age', 1)" aria-label="Increase age">+</button>
             </div>
             <div id="age-help" class="sr-only">Optional field to show age progression in results</div>
@@ -143,10 +143,12 @@
                 </div>
                 <div class="mix-config" id="etfConfig">
                   <div class="mix-return-control">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
                     <input type="range" class="return-slider" id="etfReturnSlider" min="3" max="12" step="0.1" value="7.0" onchange="updateMixReturn('etf')" aria-label="ETF return rate">
                     <span class="mix-return-rate" id="etfReturnRate" aria-live="polite">7.0%</span>
                   </div>
                   <div class="mix-allocation">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
                     <input type="range" class="mix-slider" id="etfSlider" min="0" max="100" step="5" value="40" onchange="updateMix()" aria-label="ETF allocation percentage">
                     <span class="mix-percentage" id="etfPercentage" aria-live="polite">40%</span>
                   </div>
@@ -164,10 +166,12 @@
                 </div>
                 <div class="mix-config" id="unitTrustConfig">
                   <div class="mix-return-control">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
                     <input type="range" class="return-slider" id="unitTrustReturnSlider" min="2" max="15" step="0.1" value="6.0" onchange="updateMixReturn('unitTrust')" aria-label="Unit trust return rate">
                     <span class="mix-return-rate" id="unitTrustReturnRate" aria-live="polite">6.0%</span>
                   </div>
                   <div class="mix-allocation">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
                     <input type="range" class="mix-slider" id="unitTrustSlider" min="0" max="100" step="5" value="30" onchange="updateMix()" aria-label="Unit trust allocation percentage">
                     <span class="mix-percentage" id="unitTrustPercentage" aria-live="polite">30%</span>
                   </div>
@@ -185,10 +189,12 @@
                 </div>
                 <div class="mix-config" id="fdConfig">
                   <div class="mix-return-control">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
                     <input type="range" class="return-slider" id="fdReturnSlider" min="2" max="5" step="0.1" value="3.5" onchange="updateMixReturn('fd')" aria-label="Fixed deposit return rate">
                     <span class="mix-return-rate" id="fdReturnRate" aria-live="polite">3.5%</span>
                   </div>
                   <div class="mix-allocation">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
                     <input type="range" class="mix-slider" id="fdSlider" min="0" max="100" step="5" value="20" onchange="updateMix()" aria-label="Fixed deposit allocation percentage">
                     <span class="mix-percentage" id="fdPercentage" aria-live="polite">20%</span>
                   </div>
@@ -206,10 +212,12 @@
                 </div>
                 <div class="mix-config" id="stocksConfig">
                   <div class="mix-return-control">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
                     <input type="range" class="return-slider" id="stocksReturnSlider" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('stocks')" aria-label="Stocks return rate">
                     <span class="mix-return-rate" id="stocksReturnRate" aria-live="polite">10.0%</span>
                   </div>
                   <div class="mix-allocation">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
                     <input type="range" class="mix-slider" id="stocksSlider" min="0" max="100" step="5" value="10" onchange="updateMix()" aria-label="Stocks allocation percentage">
                     <span class="mix-percentage" id="stocksPercentage" aria-live="polite">10%</span>
                   </div>
@@ -358,6 +366,7 @@
                 <div class="equation-label">Final Wealth</div>
               </div>
             </div>
+            <p class="equation-split" id="eqContributedSplit"></p>
 
             <!-- Updated Wealth Journey Section with collapsible container -->
             <div class="wealth-journey" role="region" aria-label="Wealth milestones">

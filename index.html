@@ -74,7 +74,7 @@
             <label class="input-label optional-label">Current Age</label>
             <div class="input-stepper">
               <button class="stepper-btn" onclick="adjustValue('age', -1)">−</button>
-              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="25">
+              <input type="text" class="stepper-input" id="ageInput" value="" onchange="updateFromInput('age')" oninput="formatAndUpdate('age')" placeholder="">
               <button class="stepper-btn" onclick="adjustValue('age', 1)">+</button>
             </div>
           </div>
@@ -145,11 +145,13 @@
                 </div>
                 <div class="mix-config" id="etfConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="etfReturnSlider" min="3" max="12" step="0.1" value="7.0" onchange="updateMixReturn('etf')">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="etfReturnSlider" aria-label="ETF return rate" min="3" max="12" step="0.1" value="7.0" onchange="updateMixReturn('etf')">
                     <span class="mix-return-rate" id="etfReturnRate">7.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="etfSlider" min="0" max="100" step="5" value="40" onchange="updateMix()">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="etfSlider" aria-label="ETF allocation percentage" min="0" max="100" step="5" value="40" onchange="updateMix()">
                     <span class="mix-percentage" id="etfPercentage">40%</span>
                   </div>
                 </div>
@@ -166,11 +168,13 @@
                 </div>
                 <div class="mix-config" id="unitTrustConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="unitTrustReturnSlider" min="2" max="15" step="0.1" value="6.0" onchange="updateMixReturn('unitTrust')">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="unitTrustReturnSlider" aria-label="Unit trust return rate" min="2" max="15" step="0.1" value="6.0" onchange="updateMixReturn('unitTrust')">
                     <span class="mix-return-rate" id="unitTrustReturnRate">6.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="unitTrustSlider" min="0" max="100" step="5" value="30" onchange="updateMix()">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="unitTrustSlider" aria-label="Unit trust allocation percentage" min="0" max="100" step="5" value="30" onchange="updateMix()">
                     <span class="mix-percentage" id="unitTrustPercentage">30%</span>
                   </div>
                 </div>
@@ -187,11 +191,13 @@
                 </div>
                 <div class="mix-config" id="fdConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="fdReturnSlider" min="2" max="5" step="0.1" value="3.5" onchange="updateMixReturn('fd')">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="fdReturnSlider" aria-label="Fixed deposit return rate" min="2" max="5" step="0.1" value="3.5" onchange="updateMixReturn('fd')">
                     <span class="mix-return-rate" id="fdReturnRate">3.5%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="fdSlider" min="0" max="100" step="5" value="20" onchange="updateMix()">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="fdSlider" aria-label="Fixed deposit allocation percentage" min="0" max="100" step="5" value="20" onchange="updateMix()">
                     <span class="mix-percentage" id="fdPercentage">20%</span>
                   </div>
                 </div>
@@ -208,11 +214,13 @@
                 </div>
                 <div class="mix-config" id="stocksConfig">
                   <div class="mix-return-control">
-                    <input type="range" class="return-slider" id="stocksReturnSlider" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('stocks')">
+                    <span class="mix-control-label" aria-hidden="true">Return</span>
+                    <input type="range" class="return-slider" id="stocksReturnSlider" aria-label="Stocks return rate" min="-5" max="20" step="0.1" value="10.0" onchange="updateMixReturn('stocks')">
                     <span class="mix-return-rate" id="stocksReturnRate">10.0%</span>
                   </div>
                   <div class="mix-allocation">
-                    <input type="range" class="mix-slider" id="stocksSlider" min="0" max="100" step="5" value="10" onchange="updateMix()">
+                    <span class="mix-control-label" aria-hidden="true">Share</span>
+                    <input type="range" class="mix-slider" id="stocksSlider" aria-label="Stocks allocation percentage" min="0" max="100" step="5" value="10" onchange="updateMix()">
                     <span class="mix-percentage" id="stocksPercentage">10%</span>
                   </div>
                 </div>
@@ -343,6 +351,7 @@
                 <div class="equation-label">Final Wealth</div>
               </div>
             </div>
+            <p class="equation-split" id="eqContributedSplit"></p>
 
             <!-- Progress Milestones -->
             <div class="progress-section">
