@@ -202,28 +202,28 @@ function updateInputs() {
   updateEPFRateInfo();
 }
 
+const EPF_EMPLOYEE_RATE = 0.11;
+
+// Employer share: 13% for a salary of RM 5,000 or less, 12% above
+function epfEmployerRate(salary) {
+  return salary <= 5000 ? 0.13 : 0.12;
+}
+
 function updateEPFRateInfo() {
   const epfRateInfo = document.getElementById('epfRateInfo');
   if (!epfRateInfo) return;
-  
-  const employmentContribution = values.salary <= 5000 ? 
-    values.salary * 0.24 : values.salary * 0.23;
-  const voluntaryContribution = values.voluntaryEPF;
-  const totalMonthlyEPF = employmentContribution + voluntaryContribution;
-  
-  if (values.salary <= 5000) {
-    epfRateInfo.innerHTML = `
-      Employment EPF: 24% (RM ${Math.round(employmentContribution).toLocaleString()})<br>
-      ${voluntaryContribution > 0 ? `Voluntary EPF: RM ${Math.round(voluntaryContribution).toLocaleString()}<br>` : ''}
-      <strong>Total Monthly EPF: RM ${Math.round(totalMonthlyEPF).toLocaleString()}</strong>
-    `;
-  } else {
-    epfRateInfo.innerHTML = `
-      Employment EPF: 23% (RM ${Math.round(employmentContribution).toLocaleString()})<br>
-      ${voluntaryContribution > 0 ? `Voluntary EPF: RM ${Math.round(voluntaryContribution).toLocaleString()}<br>` : ''}
-      <strong>Total Monthly EPF: RM ${Math.round(totalMonthlyEPF).toLocaleString()}</strong>
-    `;
-  }
+
+  const rm = n => `RM ${Math.round(n).toLocaleString()}`;
+  const employerRate = epfEmployerRate(values.salary);
+  const fromYou = values.salary * EPF_EMPLOYEE_RATE;
+  const fromEmployer = values.salary * employerRate;
+  const voluntary = values.voluntaryEPF;
+
+  epfRateInfo.innerHTML = `
+    You ${EPF_EMPLOYEE_RATE * 100}%: ${rm(fromYou)} + employer ${Math.round(employerRate * 100)}%: ${rm(fromEmployer)}<br>
+    ${voluntary > 0 ? `Voluntary: ${rm(voluntary)}<br>` : ''}
+    <strong>Into EPF each month: ${rm(fromYou + fromEmployer + voluntary)}</strong>
+  `;
 }
 
 function updateDisplays() {
@@ -388,16 +388,11 @@ function calculateBlendedReturn() {
 
 function calculateEPF(salary, currentBalance, voluntaryEPF, dividendRate, years) {
   // EPF contribution rates based on salary threshold
-  let employmentRate;
-  if (salary <= 5000) {
-    // RM 5,000 and below: Employee 11% + Employer 13% = 24%
-    employmentRate = 0.24;
-  } else {
-    // More than RM 5,000: Employee 11% + Employer 12% = 23%
-    employmentRate = 0.23;
-  }
-  
-  const monthlyEmploymentContribution = salary * employmentRate;
+  const employerRate = epfEmployerRate(salary);
+  const employmentRate = Math.round((EPF_EMPLOYEE_RATE + employerRate) * 100) / 100;
+  const monthlyEmployeeContribution = salary * EPF_EMPLOYEE_RATE;
+  const monthlyEmployerContribution = salary * employerRate;
+  const monthlyEmploymentContribution = monthlyEmployeeContribution + monthlyEmployerContribution;
   const monthlyVoluntaryContribution = voluntaryEPF;
   const totalMonthlyContribution = monthlyEmploymentContribution + monthlyVoluntaryContribution;
   
@@ -425,6 +420,8 @@ function calculateEPF(salary, currentBalance, voluntaryEPF, dividendRate, years)
     totalContributed: currentBalance + (totalMonthlyContribution * totalMonths),
     dataPoints: dataPoints,
     monthlyEmploymentContribution: monthlyEmploymentContribution,
+    monthlyEmployeeContribution: monthlyEmployeeContribution,
+    monthlyEmployerContribution: monthlyEmployerContribution,
     monthlyVoluntaryContribution: monthlyVoluntaryContribution,
     totalMonthlyContribution: totalMonthlyContribution,
     employmentRate: employmentRate
@@ -503,6 +500,7 @@ function calculate() {
       invested: totalInvestmentContributed,
       epfContributed: includeEPF ? epfData.totalContributed : 0,
       epfStart: includeEPF ? epfBalance : 0,
+      epfFromYou: includeEPF ? (epfData.monthlyEmployeeContribution + epfData.monthlyVoluntaryContribution) * years * 12 : 0,
       growth: totalInterest,
       finalBalance
     });
@@ -519,7 +517,7 @@ function calculate() {
   }, 500);
 }
 
-function updateSummary({ years, age, invested, epfContributed, epfStart, growth, finalBalance }) {
+function updateSummary({ years, age, invested, epfContributed, epfStart, epfFromYou, growth, finalBalance }) {
   const rm = n => `RM ${Math.round(n).toLocaleString()}`;
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   const after = `after ${years} year${years === 1 ? '' : 's'}${age !== null ? ` (age ${age + years})` : ''}`;
@@ -527,7 +525,9 @@ function updateSummary({ years, age, invested, epfContributed, epfStart, growth,
   set('eqFinalAmount', rm(finalBalance));
   set('partInvest', rm(invested));
   set('partEpf', rm(epfContributed));
-  set('partEpfNote', epfContributed ? `${rm(epfContributed - epfStart)} contributions, ${rm(epfStart)} you have now` : '');
+  set('partEpfNote', epfContributed
+    ? `${rm(epfFromYou)} from your salary, ${rm(epfContributed - epfStart - epfFromYou)} from your employer, ${rm(epfStart)} you have now`
+    : '');
   set('eqTotalInterest', rm(growth));
 
   const epfRow = document.getElementById('partEpfRow');

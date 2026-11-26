@@ -324,12 +324,12 @@ test('mix breakdown amounts add up to the milestone total', () => {
   assert.ok(Math.abs(parts.reduce((a, b) => a + b, 0) - total) <= parts.length);
 });
 
-test('the summary names the period and splits EPF into contributions and today\'s balance', () => {
+test('the summary names the period and splits EPF into your share, your employer\'s and today\'s balance', () => {
   const { api, el } = load();
   api.values.age = 30;
   api.calculate();
   assert.equal(el('summaryLabel').textContent, 'Final wealth after 20 years (age 50)');
-  assert.equal(el('partEpfNote').textContent, 'RM 288,000 contributions, RM 50,000 you have now');
+  assert.equal(el('partEpfNote').textContent, 'RM 132,000 from your salary, RM 156,000 from your employer, RM 50,000 you have now');
   assert.equal((el('summaryBar').innerHTML.match(/<span/g) || []).length, 3);
 });
 
@@ -340,4 +340,14 @@ test('milestone captions state what was put in and what it grew by', () => {
   const last = el('progressContainer').children.at(-1).innerHTML;
   const growth = futureValue(0, 1000, 7, 20) - 240000;
   assert.match(last.replace(/<[^>]+>/g, ''), new RegExp(`RM 240,000 put in, ${rm(growth)} growth`));
+});
+
+test('EPF is 11% from the employee plus 13% from the employer up to RM 5,000, 12% above', () => {
+  const { api } = load();
+  const low = api.calculateEPF(5000, 0, 0, 5.5, 1);
+  assert.equal(low.monthlyEmployeeContribution, 550);
+  assert.equal(low.monthlyEmployerContribution, 650);
+  const high = api.calculateEPF(8000, 0, 0, 5.5, 1);
+  assert.equal(high.monthlyEmployeeContribution, 880);
+  assert.equal(high.monthlyEmployerContribution, 960);
 });
