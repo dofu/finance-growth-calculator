@@ -7,6 +7,7 @@ let values = {
   years: 20,
   salary: 5000,
   epfBalance: 50000,
+  voluntaryEPF: 0,
   epfDividendRate: 5.5,
   includeEPF: true,
   useMix: false,
@@ -35,11 +36,15 @@ function adjustValue(type, change) {
     if (values[type] === null) {
       values[type] = 25; // Default starting age
     }
-    values[type] = Math.max(18, Math.min(80, values[type] + change));
+    values[type] = Math.max(1, Math.min(100, values[type] + change));
   } else if (type === 'salary') {
     values[type] = Math.max(1000, values[type] + change);
-  } else if (type === 'epfBalance') {
+    updateEPFRateInfo(); // Update EPF rate when salary changes
+  } else if (type === 'epfBalance' || type === 'voluntaryEPF') {
     values[type] = Math.max(0, values[type] + change);
+    if (type === 'voluntaryEPF') {
+      updateEPFRateInfo(); // Update EPF info when voluntary amount changes
+    }
   } else {
     values[type] = Math.max(0, values[type] + change);
   }
@@ -51,31 +56,48 @@ function formatAndUpdate(type) {
   const input = document.getElementById(type + 'Input');
   
   if (type === 'age') {
-    // Handle age field specially
+    // Handle age field specially - allow empty for optional field, no minimum age limit
     let value = input.value.replace(/[^\d]/g, '');
     if (value === '') {
       values[type] = null;
       input.value = '';
+      return; // Don't calculate if empty
     } else {
-      const numValue = Math.max(18, Math.min(80, parseInt(value) || 18));
+      const numValue = Math.max(1, Math.min(100, parseInt(value) || 1));
       values[type] = numValue;
       input.value = numValue.toString();
     }
   } else if (type === 'salary') {
-    // Remove any non-digit characters
+    // Allow clearing and typing new values
     let value = input.value.replace(/[^\d]/g, '');
+    if (value === '') {
+      input.value = '';
+      return; // Don't update values while typing
+    }
     const numValue = Math.max(1000, parseInt(value) || 1000);
     values[type] = numValue;
     input.value = numValue.toLocaleString();
-  } else {
-    // Remove any non-digit characters except comma and period
+    updateEPFRateInfo(); // Update EPF rate when salary changes
+  } else if (type === 'voluntaryEPF') {
+    // Handle voluntary EPF contributions
     let value = input.value.replace(/[^\d]/g, '');
-    
-    // Convert to number
+    if (value === '') {
+      input.value = '';
+      return;
+    }
     const numValue = Math.max(0, parseInt(value) || 0);
     values[type] = numValue;
-    
-    // Format with commas and update display
+    input.value = numValue.toLocaleString();
+    updateEPFRateInfo(); // Update EPF info when voluntary amount changes
+  } else {
+    // Remove any non-digit characters
+    let value = input.value.replace(/[^\d]/g, '');
+    if (value === '') {
+      input.value = '';
+      return; // Don't update values while typing
+    }
+    const numValue = Math.max(0, parseInt(value) || 0);
+    values[type] = numValue;
     input.value = numValue.toLocaleString();
   }
   calculate();
@@ -85,26 +107,42 @@ function updateFromInput(type) {
   const input = document.getElementById(type + 'Input');
   
   if (type === 'age') {
-    if (input.value === '') {
+    if (input.value === '' || input.value.trim() === '') {
       values[type] = null;
+      // Don't calculate if age is empty (it's optional)
+      return;
     } else {
-      const numValue = Math.max(18, Math.min(80, parseInt(input.value) || 18));
+      const cleanValue = input.value.replace(/[^\d]/g, '');
+      const numValue = Math.max(1, Math.min(100, parseInt(cleanValue) || 1));
       values[type] = numValue;
       input.value = numValue.toString();
     }
   } else if (type === 'salary') {
-    // Remove commas and parse
     const cleanValue = input.value.replace(/,/g, '');
+    if (cleanValue === '' || cleanValue.trim() === '') {
+      // Don't update if empty, let user finish typing
+      return;
+    }
     const numValue = Math.max(1000, parseInt(cleanValue) || 1000);
     values[type] = numValue;
     input.value = numValue.toLocaleString();
-  } else {
-    // Remove commas and parse
+    updateEPFRateInfo(); // Update EPF rate when salary changes
+  } else if (type === 'voluntaryEPF') {
     const cleanValue = input.value.replace(/,/g, '');
+    if (cleanValue === '' || cleanValue.trim() === '') {
+      return;
+    }
     const numValue = Math.max(0, parseInt(cleanValue) || 0);
     values[type] = numValue;
-    
-    // Format with commas
+    input.value = numValue.toLocaleString();
+    updateEPFRateInfo(); // Update EPF info when voluntary amount changes
+  } else {
+    const cleanValue = input.value.replace(/,/g, '');
+    if (cleanValue === '' || cleanValue.trim() === '') {
+      return; // Don't update if empty, let user finish typing
+    }
+    const numValue = Math.max(0, parseInt(cleanValue) || 0);
+    values[type] = numValue;
     input.value = numValue.toLocaleString();
   }
   calculate();
@@ -125,8 +163,6 @@ function updateSlider() {
   }
   
   updateDisplays();
-  
-  // Update slider positions
   updateSliderPosition('returnSlider', 'returnValue');
   updateSliderPosition('yearsSlider', 'yearsValue');
   updateSliderPosition('epfDividendSlider', 'epfDividendValue');
@@ -139,13 +175,41 @@ function updateInputs() {
   document.getElementById('initialInput').value = values.initial.toLocaleString();
   document.getElementById('salaryInput').value = values.salary.toLocaleString();
   document.getElementById('epfBalanceInput').value = values.epfBalance.toLocaleString();
+  const voluntaryInput = document.getElementById('voluntaryEPFInput');
+  if (voluntaryInput) voluntaryInput.value = values.voluntaryEPF.toLocaleString();
   if (values.age !== null) {
     document.getElementById('ageInput').value = values.age.toString();
+  }
+  
+  // Update EPF rate info
+  updateEPFRateInfo();
+}
+
+function updateEPFRateInfo() {
+  const epfRateInfo = document.getElementById('epfRateInfo');
+  if (!epfRateInfo) return;
+  
+  const employmentContribution = values.salary <= 5000 ? 
+    values.salary * 0.24 : values.salary * 0.23;
+  const voluntaryContribution = values.voluntaryEPF;
+  const totalMonthlyEPF = employmentContribution + voluntaryContribution;
+  
+  if (values.salary <= 5000) {
+    epfRateInfo.innerHTML = `
+      Employment EPF: 24% (RM ${Math.round(employmentContribution).toLocaleString()})<br>
+      ${voluntaryContribution > 0 ? `Voluntary EPF: RM ${Math.round(voluntaryContribution).toLocaleString()}<br>` : ''}
+      <strong>Total Monthly EPF: RM ${Math.round(totalMonthlyEPF).toLocaleString()}</strong>
+    `;
+  } else {
+    epfRateInfo.innerHTML = `
+      Employment EPF: 23% (RM ${Math.round(employmentContribution).toLocaleString()})<br>
+      ${voluntaryContribution > 0 ? `Voluntary EPF: RM ${Math.round(voluntaryContribution).toLocaleString()}<br>` : ''}
+      <strong>Total Monthly EPF: RM ${Math.round(totalMonthlyEPF).toLocaleString()}</strong>
+    `;
   }
 }
 
 function updateDisplays() {
-  // Update slider positions
   updateSliderPosition('returnSlider', 'returnValue');
   updateSliderPosition('yearsSlider', 'yearsValue');
   updateSliderPosition('epfDividendSlider', 'epfDividendValue');
@@ -160,21 +224,14 @@ function updateSliderPosition(sliderId, valueId) {
   const max = parseFloat(slider.max);
   const value = parseFloat(slider.value);
   
-  // Calculate percentage position (0 to 1)
   const percent = (value - min) / (max - min);
-  
-  // Use the same calculation as the working example
-  const thumbWidth = 24; // Match CSS thumb size
+  const thumbWidth = 24;
   const sliderWidth = slider.offsetWidth;
   const thumbCenterPosition = percent * (sliderWidth - thumbWidth) + thumbWidth / 2;
-  
-  // Center the bubble above the thumb
   const bubbleLeft = thumbCenterPosition - (valueDiv.offsetWidth / 2);
   
-  // Position the bubble
   valueDiv.style.left = `${bubbleLeft}px`;
   
-  // Update display text
   if (sliderId === 'returnSlider') {
     valueDiv.textContent = value.toFixed(1) + '%';
   } else if (sliderId === 'yearsSlider') {
@@ -187,6 +244,11 @@ function updateSliderPosition(sliderId, valueId) {
 function toggleEPF() {
   const epfToggle = document.getElementById('epfToggle');
   const epfSection = document.getElementById('epfSection');
+  
+  if (!epfToggle || !epfSection) {
+    console.warn('EPF toggle elements not found');
+    return;
+  }
   
   values.includeEPF = epfToggle.checked;
   
@@ -203,6 +265,11 @@ function toggleMix() {
   const mixToggle = document.getElementById('mixToggle');
   const mixSection = document.getElementById('mixSection');
   const returnSlider = document.getElementById('returnSlider');
+  
+  if (!mixToggle || !mixSection || !returnSlider) {
+    console.warn('Mix toggle elements not found');
+    return;
+  }
   
   values.useMix = mixToggle.checked;
   
@@ -232,7 +299,6 @@ function toggleInvestmentType(type) {
     config.classList.remove('disabled');
   } else {
     config.classList.add('disabled');
-    // Reset allocation to 0 when disabled
     values.mixAllocations[type] = 0;
     document.getElementById(type + 'Slider').value = 0;
   }
@@ -254,7 +320,6 @@ function updateMixReturn(type) {
     values.mixReturns[type] = newRate;
     rateDisplay.textContent = newRate.toFixed(1) + '%';
     
-    // Update blended return if mix is active
     if (values.useMix) {
       calculateBlendedReturn();
       calculate();
@@ -263,7 +328,6 @@ function updateMixReturn(type) {
 }
 
 function updateMix() {
-  // Get all slider values
   values.mixAllocations.etf = parseInt(document.getElementById('etfSlider').value);
   values.mixAllocations.unitTrust = parseInt(document.getElementById('unitTrustSlider').value);
   values.mixAllocations.fd = parseInt(document.getElementById('fdSlider').value);
@@ -275,31 +339,26 @@ function updateMix() {
 }
 
 function updateMixDisplay() {
-  // Update percentage displays
   document.getElementById('etfPercentage').textContent = values.mixAllocations.etf + '%';
   document.getElementById('unitTrustPercentage').textContent = values.mixAllocations.unitTrust + '%';
   document.getElementById('fdPercentage').textContent = values.mixAllocations.fd + '%';
   document.getElementById('stocksPercentage').textContent = values.mixAllocations.stocks + '%';
   
-  // Update return rate displays
   document.getElementById('etfReturnRate').textContent = values.mixReturns.etf.toFixed(1) + '%';
   document.getElementById('unitTrustReturnRate').textContent = values.mixReturns.unitTrust.toFixed(1) + '%';
   document.getElementById('fdReturnRate').textContent = values.mixReturns.fd.toFixed(1) + '%';
   document.getElementById('stocksReturnRate').textContent = values.mixReturns.stocks.toFixed(1) + '%';
   
-  // Update slider positions
   document.getElementById('etfReturnSlider').value = values.mixReturns.etf;
   document.getElementById('unitTrustReturnSlider').value = values.mixReturns.unitTrust;
   document.getElementById('fdReturnSlider').value = values.mixReturns.fd;
   document.getElementById('stocksReturnSlider').value = values.mixReturns.stocks;
   
-  // Calculate total allocation
   const total = values.mixAllocations.etf + values.mixAllocations.unitTrust + 
                 values.mixAllocations.fd + values.mixAllocations.stocks;
   
   document.getElementById('totalPercentage').textContent = total + '%';
   
-  // Update allocation status
   const statusEl = document.getElementById('allocationStatus');
   if (total === 100) {
     statusEl.textContent = '✓ Balanced';
@@ -320,7 +379,6 @@ function calculateBlendedReturn() {
   const returns = values.mixReturns;
   const enabled = values.mixEnabled;
   
-  // Only calculate for enabled investment types
   let totalAllocation = 0;
   let weightedReturn = 0;
   
@@ -347,13 +405,27 @@ function calculateBlendedReturn() {
     values.returnRate = weightedReturn;
   }
   
-  // Update display
-  document.getElementById('blendedRate').textContent = values.returnRate.toFixed(1) + '%';
+  const blendedRate = document.getElementById('blendedRate');
+  if (blendedRate) {
+    blendedRate.textContent = values.returnRate.toFixed(1) + '%';
+  }
 }
 
-function calculateEPF(salary, currentBalance, dividendRate, years) {
-  // EPF contribution rates: Employee 11% + Employer 11% = 22% of salary
-  const monthlyContribution = salary * 0.22;
+function calculateEPF(salary, currentBalance, voluntaryEPF, dividendRate, years) {
+  // EPF contribution rates based on salary threshold
+  let employmentRate;
+  if (salary <= 5000) {
+    // RM 5,000 and below: Employee 11% + Employer 13% = 24%
+    employmentRate = 0.24;
+  } else {
+    // More than RM 5,000: Employee 11% + Employer 12% = 23%
+    employmentRate = 0.23;
+  }
+  
+  const monthlyEmploymentContribution = salary * employmentRate;
+  const monthlyVoluntaryContribution = voluntaryEPF;
+  const totalMonthlyContribution = monthlyEmploymentContribution + monthlyVoluntaryContribution;
+  
   const monthlyRate = dividendRate / 100 / 12;
   const totalMonths = years * 12;
   
@@ -361,37 +433,49 @@ function calculateEPF(salary, currentBalance, dividendRate, years) {
   const dataPoints = [];
   
   for (let month = 1; month <= totalMonths; month++) {
-    balance = balance * (1 + monthlyRate) + monthlyContribution;
+    balance = balance * (1 + monthlyRate) + totalMonthlyContribution;
     
     if (month % 12 === 0) {
       const currentYear = month / 12;
       dataPoints.push({
         year: currentYear,
         balance: balance,
-        contributed: currentBalance + (monthlyContribution * month)
+        contributed: currentBalance + (totalMonthlyContribution * month)
       });
     }
   }
   
   return {
     finalBalance: balance,
-    totalContributed: currentBalance + (monthlyContribution * totalMonths),
-    dataPoints: dataPoints
+    totalContributed: currentBalance + (totalMonthlyContribution * totalMonths),
+    dataPoints: dataPoints,
+    monthlyEmploymentContribution: monthlyEmploymentContribution,
+    monthlyVoluntaryContribution: monthlyVoluntaryContribution,
+    totalMonthlyContribution: totalMonthlyContribution,
+    employmentRate: employmentRate
   };
 }
 
 function calculate() {
-  // Hide blank state and show loading within chart container
-  document.getElementById('blankState').style.display = 'none';
-  document.getElementById('wealthChart').style.display = 'none';
-  document.getElementById('loadingStateChart').style.display = 'flex';
+  // Check if required elements exist before proceeding
+  const blankState = document.getElementById('blankState');
+  const wealthChart = document.getElementById('wealthChart');
+  const loadingStateChart = document.getElementById('loadingStateChart');
+  
+  if (!blankState || !wealthChart || !loadingStateChart) {
+    console.warn('Required chart elements not found');
+    return;
+  }
+  
+  blankState.style.display = 'none';
+  wealthChart.style.display = 'none';
+  loadingStateChart.style.display = 'flex';
 
   setTimeout(() => {
     const { age, monthly, initial, returnRate, years, salary, epfBalance, epfDividendRate, includeEPF } = values;
     const monthlyRate = returnRate / 100 / 12;
     const totalMonths = years * 12;
     
-    // Calculate voluntary investments
     let investmentBalance = initial;
     let totalInvestmentContributed = initial;
     const investmentDataPoints = [];
@@ -413,16 +497,14 @@ function calculate() {
       }
     }
 
-    // Calculate EPF if included
     let epfData = null;
     let combinedDataPoints = [...investmentDataPoints];
     let finalBalance = investmentBalance;
     let totalContributed = totalInvestmentContributed;
     
     if (includeEPF) {
-      epfData = calculateEPF(salary, epfBalance, epfDividendRate, years);
+      epfData = calculateEPF(salary, epfBalance, values.voluntaryEPF, epfDividendRate, years);
       
-      // Combine investment and EPF data
       combinedDataPoints = investmentDataPoints.map((point, index) => {
         const epfPoint = epfData.dataPoints[index];
         return {
@@ -440,7 +522,6 @@ function calculate() {
 
     const totalInterest = finalBalance - totalContributed;
 
-    // Update equation layout - check if elements exist
     const eqTotalContributedEl = document.getElementById('eqTotalContributed');
     const eqTotalInterestEl = document.getElementById('eqTotalInterest');
     const eqFinalAmountEl = document.getElementById('eqFinalAmount');
@@ -449,16 +530,15 @@ function calculate() {
     if (eqTotalInterestEl) eqTotalInterestEl.textContent = `RM ${Math.round(totalInterest).toLocaleString()}`;
     if (eqFinalAmountEl) eqFinalAmountEl.textContent = `RM ${Math.round(finalBalance).toLocaleString()}`;
 
-    // Update chart
     updateChart(combinedDataPoints, includeEPF);
-
-    // Update progress milestones
     updateProgressMilestones(combinedDataPoints, age);
+    updateCalculationBreakdown();
 
-    // Hide loading and show chart
-    document.getElementById('loadingStateChart').style.display = 'none';
-    document.getElementById('wealthChart').style.display = 'block';
-    document.getElementById('resultsContent').classList.add('fade-in');
+    if (loadingStateChart) loadingStateChart.style.display = 'none';
+    if (wealthChart) wealthChart.style.display = 'block';
+    
+    const resultsContent = document.getElementById('resultsContent');
+    if (resultsContent) resultsContent.classList.add('fade-in');
   }, 500);
 }
 
@@ -469,7 +549,6 @@ function updateChart(dataPoints, includeEPF) {
     chart.destroy();
   }
 
-  // Create labels based on whether age is provided
   const labels = dataPoints.map(point => {
     if (point.age !== null) {
       return `Year ${point.year} (Age ${point.age})`;
@@ -490,7 +569,6 @@ function updateChart(dataPoints, includeEPF) {
     }
   ];
 
-  // Add EPF breakdown if EPF is included
   if (includeEPF) {
     datasets.push({
       label: 'EPF Balance',
@@ -512,7 +590,6 @@ function updateChart(dataPoints, includeEPF) {
       tension: 0.4
     });
   } else {
-    // Show contributions for comparison when EPF is disabled
     datasets.push({
       label: 'Contributions',
       data: dataPoints.map(point => point.contributed),
@@ -544,8 +621,8 @@ function updateChart(dataPoints, includeEPF) {
               weight: 600
             },
             pointStyle: 'circle',
-            boxWidth: 4,  // Makes the legend circles smaller
-            boxHeight: 4  // Makes the legend circles smaller
+            boxWidth: 4,
+            boxHeight: 4
           }
         },
         tooltip: {
@@ -601,14 +678,10 @@ function updateChart(dataPoints, includeEPF) {
 
 function updateProgressMilestones(dataPoints, age) {
   const progressContainer = document.getElementById('progressContainer');
-  
-  // Clear existing progress items
   progressContainer.innerHTML = '';
   
-  // Create new progress items based on data
   const milestones = [];
   
-  // Add milestone for every 5 years, plus the final year
   for (let i = 0; i < dataPoints.length; i++) {
     const point = dataPoints[i];
     if (point.year % 5 === 0 || i === dataPoints.length - 1) {
@@ -616,18 +689,18 @@ function updateProgressMilestones(dataPoints, age) {
     }
   }
   
-  // Limit to 3-4 most significant milestones
   const selectedMilestones = [];
-  if (milestones.length > 0) selectedMilestones.push(milestones[0]); // First milestone
+  if (milestones.length > 0) selectedMilestones.push(milestones[0]);
   if (milestones.length > 2) {
     const midIndex = Math.floor(milestones.length / 2);
-    selectedMilestones.push(milestones[midIndex]); // Middle milestone
+    selectedMilestones.push(milestones[midIndex]);
   }
-  if (milestones.length > 1) selectedMilestones.push(milestones[milestones.length - 1]); // Final milestone
+  if (milestones.length > 1) selectedMilestones.push(milestones[milestones.length - 1]);
   
   selectedMilestones.forEach((milestone, index) => {
     const progressItem = document.createElement('div');
     progressItem.className = 'progress-item';
+    progressItem.setAttribute('role', 'listitem');
     
     const yearText = age !== null ? 
       `Year ${milestone.year} (Age ${milestone.age})` : 
@@ -652,13 +725,11 @@ function updateProgressMilestones(dataPoints, age) {
       }
     }
     
-    // Check if EPF is included to show breakdown
     const includeEPF = values.includeEPF && milestone.epfBalance;
     const useMix = values.useMix;
     
     let breakdownHtml = '';
     if (includeEPF && useMix) {
-      // Show both EPF and investment mix breakdown
       const investmentAmount = milestone.investmentBalance || 0;
       const epfAmount = milestone.epfBalance || 0;
       
@@ -675,7 +746,6 @@ function updateProgressMilestones(dataPoints, age) {
         </div>
       `;
     } else if (includeEPF) {
-      // Show EPF breakdown only
       const investmentAmount = milestone.investmentBalance || 0;
       const epfAmount = milestone.epfBalance || 0;
       
@@ -692,7 +762,6 @@ function updateProgressMilestones(dataPoints, age) {
         </div>
       `;
     } else if (useMix) {
-      // Show investment mix breakdown only
       const totalInvestment = milestone.balance;
       let mixBreakdown = '';
       
@@ -757,15 +826,17 @@ function updateProgressMilestones(dataPoints, age) {
   });
 }
 
-// Toggle Instructions Function
 function toggleInstructions() {
   const steps = document.getElementById('instructionSteps');
   const toggleIcon = document.querySelector('.toggle-icon');
+  const header = document.querySelector('.instructions-header');
   
   steps.classList.toggle('collapsed');
   toggleIcon.classList.toggle('rotated');
   
-  // Update toggle icon
+  const isExpanded = !steps.classList.contains('collapsed');
+  header.setAttribute('aria-expanded', isExpanded.toString());
+  
   if (steps.classList.contains('collapsed')) {
     toggleIcon.textContent = '+';
   } else {
@@ -773,42 +844,187 @@ function toggleInstructions() {
   }
 }
 
-// Initialize
+function toggleWealthJourney() {
+  const details = document.getElementById('wealthJourneyDetails');
+  const toggleIcon = document.querySelector('.wealth-journey-toggle-icon');
+  const header = document.querySelector('.wealth-journey-header');
+  
+  details.classList.toggle('collapsed');
+  toggleIcon.classList.toggle('rotated');
+  
+  const isExpanded = !details.classList.contains('collapsed');
+  header.setAttribute('aria-expanded', isExpanded.toString());
+  
+  if (details.classList.contains('collapsed')) {
+    toggleIcon.textContent = '+';
+  } else {
+    toggleIcon.textContent = '−';
+  }
+}
+
+function toggleCalculationBreakdown() {
+  const details = document.getElementById('breakdownDetails');
+  const toggleIcon = document.querySelector('.breakdown-toggle-icon');
+  const header = document.querySelector('.breakdown-header');
+  
+  details.classList.toggle('collapsed');
+  toggleIcon.classList.toggle('rotated');
+  
+  const isExpanded = !details.classList.contains('collapsed');
+  header.setAttribute('aria-expanded', isExpanded.toString());
+  
+  if (details.classList.contains('collapsed')) {
+    toggleIcon.textContent = '+';
+  } else {
+    toggleIcon.textContent = '−';
+  }
+}
+
+function updateCalculationBreakdown() {
+  const calculationBreakdown = document.getElementById('calculationBreakdown');
+  if (calculationBreakdown) {
+    calculationBreakdown.style.display = 'block';
+  }
+  
+  // Safely update elements if they exist
+  const breakdownMonthly = document.getElementById('breakdownMonthly');
+  if (breakdownMonthly) breakdownMonthly.textContent = `RM ${values.monthly.toLocaleString()}`;
+  
+  const breakdownInitial = document.getElementById('breakdownInitial');
+  if (breakdownInitial) breakdownInitial.textContent = `RM ${values.initial.toLocaleString()}`;
+  
+  const breakdownYears = document.getElementById('breakdownYears');
+  if (breakdownYears) breakdownYears.textContent = `${values.years} years`;
+  
+  const breakdownReturn = document.getElementById('breakdownReturn');
+  if (breakdownReturn) {
+    if (values.useMix) {
+      breakdownReturn.textContent = `${values.returnRate.toFixed(1)}% (blended)`;
+    } else {
+      breakdownReturn.textContent = `${values.returnRate.toFixed(1)}%`;
+    }
+  }
+  
+  const epfBreakdownSection = document.getElementById('epfBreakdownSection');
+  if (values.includeEPF && epfBreakdownSection) {
+    epfBreakdownSection.style.display = 'block';
+    
+    const employmentRate = values.salary <= 5000 ? 0.24 : 0.23;
+    const employmentContrib = values.salary * employmentRate;
+    const totalEPF = employmentContrib + values.voluntaryEPF;
+    
+    const breakdownSalary = document.getElementById('breakdownSalary');
+    if (breakdownSalary) breakdownSalary.textContent = `RM ${values.salary.toLocaleString()}`;
+    
+    const breakdownEmploymentRate = document.getElementById('breakdownEmploymentRate');
+    if (breakdownEmploymentRate) {
+      if (values.salary <= 5000) {
+        breakdownEmploymentRate.textContent = '24% (Employee 11% + Employer 13%)';
+      } else {
+        breakdownEmploymentRate.textContent = '23% (Employee 11% + Employer 12%)';
+      }
+    }
+    
+    const breakdownEmploymentContrib = document.getElementById('breakdownEmploymentContrib');
+    if (breakdownEmploymentContrib) breakdownEmploymentContrib.textContent = `RM ${Math.round(employmentContrib).toLocaleString()}`;
+    
+    const breakdownVoluntaryEPF = document.getElementById('breakdownVoluntaryEPF');
+    if (breakdownVoluntaryEPF) breakdownVoluntaryEPF.textContent = `RM ${values.voluntaryEPF.toLocaleString()}`;
+    
+    const breakdownTotalEPF = document.getElementById('breakdownTotalEPF');
+    if (breakdownTotalEPF) breakdownTotalEPF.innerHTML = `<strong>RM ${Math.round(totalEPF).toLocaleString()}</strong>`;
+    
+    const breakdownEPFBalance = document.getElementById('breakdownEPFBalance');
+    if (breakdownEPFBalance) breakdownEPFBalance.textContent = `RM ${values.epfBalance.toLocaleString()}`;
+    
+    const breakdownEPFRate = document.getElementById('breakdownEPFRate');
+    if (breakdownEPFRate) breakdownEPFRate.textContent = `${values.epfDividendRate.toFixed(1)}% (average)`;
+    
+    const voluntaryLine = document.getElementById('voluntaryEPFLine');
+    if (voluntaryLine) {
+      if (values.voluntaryEPF > 0) {
+        voluntaryLine.style.display = 'flex';
+      } else {
+        voluntaryLine.style.display = 'none';
+      }
+    }
+  } else if (epfBreakdownSection) {
+    epfBreakdownSection.style.display = 'none';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-  // Set instructions closed by default
+  const instructionsHeader = document.querySelector('.instructions-header');
+  if (instructionsHeader) {
+    instructionsHeader.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleInstructions();
+      }
+    });
+  }
+
+  const breakdownHeader = document.querySelector('.breakdown-header');
+  if (breakdownHeader) {
+    breakdownHeader.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleCalculationBreakdown();
+      }
+    });
+  }
+
+  const wealthJourneyHeader = document.querySelector('.wealth-journey-header');
+  if (wealthJourneyHeader) {
+    wealthJourneyHeader.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleWealthJourney();
+      }
+    });
+  }
+
   const steps = document.getElementById('instructionSteps');
   const toggleIcon = document.querySelector('.toggle-icon');
   steps.classList.add('collapsed');
   toggleIcon.textContent = '+';
   
+  // Set initial state for breakdown section (collapsed)
+  const breakdownDetails = document.getElementById('breakdownDetails');
+  const breakdownToggleIcon = document.querySelector('.breakdown-toggle-icon');
+  if (breakdownDetails && breakdownToggleIcon) {
+    breakdownDetails.classList.add('collapsed');
+    breakdownToggleIcon.textContent = '+';
+  }
+  
+  // Set initial state for wealth journey (expanded by default)
+  const wealthJourneyToggleIcon = document.querySelector('.wealth-journey-toggle-icon');
+  if (wealthJourneyToggleIcon) {
+    wealthJourneyToggleIcon.textContent = '−';
+  }
+  
   updateInputs();
   updateDisplays();
   
-  // Initialize slider positions
   setTimeout(() => {
     updateSliderPosition('returnSlider', 'returnValue');
     updateSliderPosition('yearsSlider', 'yearsValue');
     updateSliderPosition('epfDividendSlider', 'epfDividendValue');
   }, 100);
   
-  // Initialize EPF toggle state
   const epfToggle = document.getElementById('epfToggle');
   const epfSection = document.getElementById('epfSection');
   if (epfToggle && epfToggle.checked) {
     epfSection.classList.remove('hidden');
   }
   
-  // Initialize Mix toggle state
   const mixToggle = document.getElementById('mixToggle');
   const mixSection = document.getElementById('mixSection');
   if (mixToggle && !mixToggle.checked) {
     mixSection.classList.add('hidden');
   }
   
-  // Initialize mix display if elements exist
   if (document.getElementById('etfPercentage')) {
     updateMixDisplay();
   }
-  
-  // Don't calculate on load - let blank state show
 });
