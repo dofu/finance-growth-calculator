@@ -632,9 +632,9 @@ function updateSummary({ years, age, invested, epfContributed, epfStart, epfFrom
   const rm = n => `RM ${Math.round(n).toLocaleString()}`;
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   const after = `after ${years} year${years === 1 ? '' : 's'}${age !== null ? ` (age ${age + years})` : ''}`;
-  set('summaryLabel', `Likely final wealth ${after}`);
+  set('summaryLabel', `What you'd likely have ${after}`);
   set('eqFinalAmount', rm(finalBalance));
-  set('summaryRange', `8 in 10 outcomes land between ${rm(low)} and ${rm(high)}. If every year paid exactly the average: ${rm(averageBalance)}.`);
+  set('summaryRange', `Returns rise and fall from year to year, so in most cases you'd end up with ${rm(low)} to ${rm(high)}. If every year paid the same return, it would be ${rm(averageBalance)}.`);
   set('partInvest', rm(invested));
   set('partEpf', rm(epfContributed));
   set('partEpfNote', epfContributed
@@ -671,7 +671,7 @@ function updateChart(dataPoints, includeEPF) {
 
   const datasets = [
     {
-      label: 'Total Wealth',
+      label: 'Total',
       data: dataPoints.map(point => point.balance),
       borderColor: '#E0457B',
       backgroundColor: 'rgba(224, 69, 123, 0.08)',
@@ -680,7 +680,7 @@ function updateChart(dataPoints, includeEPF) {
       tension: 0.4
     },
     {
-      label: 'Likely range',
+      label: 'Range in most cases',
       data: dataPoints.map(point => point.high),
       borderColor: 'transparent',
       backgroundColor: 'rgba(224, 69, 123, 0.12)',
@@ -702,7 +702,7 @@ function updateChart(dataPoints, includeEPF) {
 
   if (includeEPF) {
     datasets.push({
-      label: 'EPF Balance',
+      label: 'EPF',
       data: dataPoints.map(point => point.epfBalance || 0),
       borderColor: '#3E6FC4',
       backgroundColor: 'rgba(62, 111, 196, 0.08)',
@@ -712,7 +712,7 @@ function updateChart(dataPoints, includeEPF) {
     });
     
     datasets.push({
-      label: 'Investment Balance',
+      label: 'Your investments',
       data: dataPoints.map(point => point.investmentBalance || 0),
       borderColor: '#14998A',
       backgroundColor: 'rgba(20, 153, 138, 0.08)',
@@ -722,7 +722,7 @@ function updateChart(dataPoints, includeEPF) {
     });
   } else {
     datasets.push({
-      label: 'Contributions',
+      label: 'Money put in',
       data: dataPoints.map(point => point.contributed),
       borderColor: '#14998A',
       backgroundColor: 'rgba(20, 153, 138, 0.08)',
@@ -777,9 +777,9 @@ function updateChart(dataPoints, includeEPF) {
           callbacks: {
             label: function(context) {
               if (context.dataset.label === 'range-low') return null;
-              if (context.dataset.label === 'Likely range') {
+              if (context.dataset.label === 'Range in most cases') {
                 const point = dataPoints[context.dataIndex];
-                return `Likely range: RM ${Math.round(point.low).toLocaleString()} to RM ${Math.round(point.high).toLocaleString()}`;
+                return `Range in most cases: RM ${Math.round(point.low).toLocaleString()} to RM ${Math.round(point.high).toLocaleString()}`;
               }
               return context.dataset.label + ': RM ' + Math.round(context.parsed.y).toLocaleString();
             }
@@ -844,7 +844,7 @@ function updateProgressMilestones(dataPoints, age) {
       `Year ${milestone.year}`;
     
     const putIn = milestone.totalContributed ?? milestone.contributed;
-    const description = `<span class="amount">RM ${Math.round(putIn).toLocaleString()}</span> put in, <span class="amount">RM ${Math.round(milestone.balance - putIn).toLocaleString()}</span> growth`;
+    const description = `<span class="amount">RM ${Math.round(putIn).toLocaleString()}</span> put in, <span class="amount">RM ${Math.round(milestone.balance - putIn).toLocaleString()}</span> earned`;
 
     const includeEPF = values.includeEPF && milestone.epfBalance;
     const useMix = values.useMix;
@@ -906,7 +906,7 @@ function updateProgressMilestones(dataPoints, age) {
       </div>
       <div class="progress-total">
         <div class="progress-amount">RM ${Math.round(milestone.balance).toLocaleString()}</div>
-        ${includeEPF ? '<div class="progress-total-label">Total Wealth</div>' : ''}
+        ${includeEPF ? '<div class="progress-total-label">Total</div>' : ''}
       </div>
     `;
     
@@ -987,7 +987,7 @@ function updateCalculationBreakdown() {
   const breakdownReturn = document.getElementById('breakdownReturn');
   if (breakdownReturn) {
     if (values.useMix) {
-      breakdownReturn.textContent = `${values.returnRate.toFixed(1)}% (blended)`;
+      breakdownReturn.textContent = `${values.returnRate.toFixed(1)}% (your mix)`;
     } else {
       breakdownReturn.textContent = `${values.returnRate.toFixed(1)}%`;
     }

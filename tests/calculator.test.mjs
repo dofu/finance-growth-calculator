@@ -58,8 +58,8 @@ function load({ missing = [] } = {}) {
 const rm = n => `RM ${Math.round(n).toLocaleString()}`;
 const num = s => Number(String(s).replace(/[^\d-]/g, ''));
 // The figure "If every year paid exactly the average" from the summary
-const averageShown = el => el('summaryRange').textContent.match(/exactly the average: (RM [\d,]+)/)[1];
-const rangeShown = el => el('summaryRange').textContent.match(/between (RM [\d,]+) and (RM [\d,]+)/).slice(1).map(num);
+const averageShown = el => el('summaryRange').textContent.match(/it would be (RM [\d,]+)/)[1];
+const rangeShown = el => el('summaryRange').textContent.match(/end up with (RM [\d,]+) to (RM [\d,]+)/).slice(1).map(num);
 
 // Future value of a starting sum plus a fixed deposit at the end of each month.
 function futureValue(start, monthly, annualRatePct, years) {
@@ -282,7 +282,7 @@ test('chart has one point per year and three lines with EPF on', () => {
   api.calculate();
   const { data } = charts.at(-1).config;
   assert.equal(data.labels.length, 12);
-  assert.deepEqual([...data.datasets.map(d => d.label)], ['Total Wealth', 'Likely range', 'range-low', 'EPF Balance', 'Investment Balance']);
+  assert.deepEqual([...data.datasets.map(d => d.label)], ['Total', 'Range in most cases', 'range-low', 'EPF', 'Your investments']);
 });
 
 test('chart labels show age when age is set', () => {
@@ -332,7 +332,7 @@ test('the summary names the period and splits EPF into your share, your employer
   const { api, el } = load();
   api.values.age = 30;
   api.calculate();
-  assert.equal(el('summaryLabel').textContent, 'Likely final wealth after 20 years (age 50)');
+  assert.equal(el('summaryLabel').textContent, "What you'd likely have after 20 years (age 50)");
   assert.equal(el('partEpfNote').textContent, 'RM 132,000 from your salary, RM 156,000 from your employer, RM 50,000 you have now');
   assert.equal((el('summaryBar').innerHTML.match(/<span/g) || []).length, 3);
 });
@@ -343,7 +343,7 @@ test('milestone captions state what was put in and what it grew by', () => {
   api.calculate();
   const last = el('progressContainer').children.at(-1).innerHTML.replace(/<[^>]+>/g, '');
   const growth = num(el('eqFinalAmount').textContent) - 240000;
-  assert.match(last, new RegExp(`RM 240,000 put in, ${rm(growth)} growth`));
+  assert.match(last, new RegExp(`RM 240,000 put in, ${rm(growth)} earned`));
 });
 
 test('EPF is 11% from the employee plus 13% from the employer up to RM 5,000, 12% above', () => {
