@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
-  <title>💰 WealthGrow - Smart Investment Calculator (Extended)</title>
+  <title>WealthGrow: investment and EPF calculator (extended)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -14,8 +14,8 @@
   <!-- Header Section with proper semantic HTML -->
   <header class="hero" role="banner">
     <div class="hero-content">
-      <h1><span class="build-text">Build Your</span> <span class="gradient-text">Wealth</span></h1>
-      <p>Create realistic wealth projections using customizable investment portfolios and EPF tracking. Adjust return rates for different investment types to match your actual strategy and risk tolerance.</p>
+      <h1><span class="build-text">Build Your</span> <span class="accent-text">Wealth</span></h1>
+      <p>See what monthly investing and EPF could grow to, in ringgit.</p>
     </div>
   </header>
 
@@ -64,7 +64,6 @@
         <!-- Left Panel - Inputs -->
         <section class="inputs-panel" aria-label="Investment parameters">
           <h2 class="panel-title">Investment Parameters</h2>
-          <p class="panel-subtitle">Adjust the values below to see how your investments will grow</p>
 
           <!-- Current Age -->
           <div class="input-group compact">
@@ -228,7 +227,7 @@
             <div class="mix-total">
               <span class="total-label">Total Allocation:</span>
               <span class="total-percentage" id="totalPercentage" aria-live="polite">100%</span>
-              <span class="allocation-status" id="allocationStatus" aria-live="polite">✓ Balanced</span>
+              <span class="allocation-status" id="allocationStatus" aria-live="polite">Balanced</span>
             </div>
           </div>
 
@@ -325,7 +324,7 @@
         <section class="results-panel" aria-label="Calculation results">
           <div id="loadingState" class="loading" style="display: none;" aria-live="polite">
             <div class="spinner" aria-hidden="true"></div>
-            <p>Calculating your financial future...</p>
+            <p>Calculating...</p>
           </div>
 
           <div id="resultsContent">
@@ -340,7 +339,7 @@
               </div>
               <div id="loadingStateChart" class="loading" style="display: none;" aria-live="polite">
                 <div class="spinner" aria-hidden="true"></div>
-                <p>Calculating your financial future...</p>
+                <p>Calculating...</p>
               </div>
               <canvas id="wealthChart" style="display: none;" aria-label="Wealth growth over time chart"></canvas>
             </div>
@@ -371,7 +370,7 @@
             <!-- Updated Wealth Journey Section with collapsible container -->
             <div class="wealth-journey" role="region" aria-label="Wealth milestones">
               <div class="wealth-journey-header" onclick="toggleWealthJourney()" role="button" tabindex="0" aria-expanded="true" aria-controls="wealthJourneyDetails">
-                <h3>📈 Your Wealth Journey</h3>
+                <h3>Your Wealth Journey</h3>
                 <button class="wealth-journey-toggle-btn" id="wealthJourneyToggleBtn" aria-label="Toggle wealth journey">
                   <span class="wealth-journey-toggle-icon">−</span>
                 </button>
@@ -405,7 +404,7 @@
             <!-- Calculation Breakdown Section -->
             <div class="calculation-breakdown" id="calculationBreakdown" >
               <div class="breakdown-header" onclick="toggleCalculationBreakdown()" role="button" tabindex="0" aria-expanded="false" aria-controls="breakdownDetails">
-                <h3>📊 Calculation Breakdown</h3>
+                <h3>Calculation Breakdown</h3>
                 <button class="breakdown-toggle-btn" id="breakdownToggleBtn" aria-label="Toggle calculation breakdown">
                   <span class="breakdown-toggle-icon">+</span>
                 </button>
@@ -413,7 +412,6 @@
               <div class="breakdown-details collapsed" id="breakdownDetails">
                 <div class="breakdown-content">
                   <div class="breakdown-disclaimer">
-                    <div class="disclaimer-icon">⚠️</div>
                     <div class="disclaimer-text">
                       <strong>Important Note:</strong> EPF dividend rates vary yearly (historically 4-6%). This calculator uses your input rate as an average for projection purposes. Actual results may differ based on KWSP's annual dividend declarations.
                     </div>

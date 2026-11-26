@@ -362,13 +362,13 @@ function updateMixDisplay() {
   
   const statusEl = document.getElementById('allocationStatus');
   if (total === 100) {
-    statusEl.textContent = '✓ Balanced';
+    statusEl.textContent = 'Balanced';
     statusEl.className = 'allocation-status balanced';
   } else if (total < 100) {
-    statusEl.textContent = `⚠ ${100 - total}% unallocated`;
+    statusEl.textContent = `${100 - total}% unallocated`;
     statusEl.className = 'allocation-status warning';
   } else {
-    statusEl.textContent = `⚠ ${total - 100}% over-allocated`;
+    statusEl.textContent = `${total - 100}% over-allocated`;
     statusEl.className = 'allocation-status warning';
   }
 }

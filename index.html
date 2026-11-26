@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>💰 WealthGrow - Smart Investment Calculator</title>
+  <title>WealthGrow: investment and EPF calculator</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -13,8 +13,8 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <h1><span class="build-text">Build Your</span> <span class="gradient-text">Wealth</span></h1>
-      <p>Create realistic wealth projections using customizable investment portfolios and EPF tracking. Adjust return rates for different investment types to match your actual strategy and risk tolerance.</p>
+      <h1><span class="build-text">Build Your</span> <span class="accent-text">Wealth</span></h1>
+      <p>See what monthly investing and EPF could grow to, in ringgit.</p>
     </div>
   </section>
 
@@ -29,28 +29,28 @@
       </div>
       <div class="instruction-steps" id="instructionSteps">
         <div class="step-item">
-          <div class="step-icon">💰</div>
+          <div class="step-icon">1</div>
           <div class="step-content">
             <h4>Set Investment Amount</h4>
             <p>Enter monthly contributions and optional initial lump sum</p>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-icon">📊</div>
+          <div class="step-icon">2</div>
           <div class="step-content">
             <h4>Choose Investment Strategy</h4>
             <p>Use simple returns or customize portfolio mix with specific allocations</p>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-icon">🏦</div>
+          <div class="step-icon">3</div>
           <div class="step-content">
             <h4>Include EPF (Optional)</h4>
             <p>Add salary to track mandatory EPF alongside personal investments</p>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-icon">🎯</div>
+          <div class="step-icon">4</div>
           <div class="step-content">
             <h4>View Wealth Projection</h4>
             <p>See complete breakdown: investments, EPF, and realistic growth milestones</p>
@@ -67,7 +67,6 @@
         <!-- Left Panel - Inputs -->
         <div class="inputs-panel">
           <h2 class="panel-title">Investment Parameters</h2>
-          <p class="panel-subtitle">Adjust the values below to see how your investments will grow</p>
 
           <!-- Current Age -->
           <div class="input-group compact">
@@ -230,7 +229,7 @@
             <div class="mix-total">
               <span class="total-label">Total Allocation:</span>
               <span class="total-percentage" id="totalPercentage">100%</span>
-              <span class="allocation-status" id="allocationStatus">✓ Balanced</span>
+              <span class="allocation-status" id="allocationStatus">Balanced</span>
             </div>
           </div>
 
@@ -310,7 +309,7 @@
         <div class="results-panel">
           <div id="loadingState" class="loading" style="display: none;">
             <div class="spinner"></div>
-            <p>Calculating your financial future...</p>
+            <p>Calculating...</p>
           </div>
 
           <div id="resultsContent">
@@ -325,7 +324,7 @@
               </div>
               <div id="loadingStateChart" class="loading" style="display: none;">
                 <div class="spinner"></div>
-                <p>Calculating your financial future...</p>
+                <p>Calculating...</p>
               </div>
               <canvas id="wealthChart" style="display: none;"></canvas>
             </div>
